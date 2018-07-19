@@ -1,0 +1,14 @@
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Checkers.exe.config
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Checkers.exe
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Checkers.pdb
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\MainWindow.g.cs
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\App.g.cs
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers_MarkupCompile.cache
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers_MarkupCompile.lref
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\MainWindow.baml
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.g.resources
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.Properties.Resources.resources
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.csproj.GenerateResource.Cache
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.exe
+c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.pdb
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.csprojResolveAssemblyReference.cache
