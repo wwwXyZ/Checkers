@@ -34,6 +34,7 @@ namespace Checkers
 
         private void btn_new_game_Click(object sender, RoutedEventArgs e)
         {
+            generate_grid();
         }
 
         public void generate_grid()
@@ -42,7 +43,6 @@ namespace Checkers
             var height = Desk.Height;
             Ungrd.Columns = width;
             Ungrd.Rows = height;
-
             Desk.Clear_cells();
             Desk.Generate(true);
             Render_checkers_position(true);
@@ -66,12 +66,12 @@ namespace Checkers
                     var button = Ungrd.Children[i] as Button;
 
                     var btn = Desk.Cells[i].RenderDeskChellAsButton();
-                    copyControl(btn, button);
+                    CopyControl(btn, button);
                 }
             }
         }
 
-        private void copyControl(Control sourceControl, Control targetControl)
+        private void CopyControl(Control sourceControl, Control targetControl)
         {
             // make sure these are the same
             if (sourceControl.GetType() != targetControl.GetType())

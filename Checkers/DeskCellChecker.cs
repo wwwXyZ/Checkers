@@ -22,6 +22,12 @@ namespace Checkers
         {
             return _isKing;
         }
+
+        public void SetAsKing()
+        {
+            _isKing = true;
+        }
+
         public bool Is_white()
         {
             return is_white;

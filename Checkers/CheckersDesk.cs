@@ -21,10 +21,16 @@ namespace Checkers
         public bool CurrentWhiteTurn;
         public int Rotation { get; } // 0 - default; 1 - right; 2 - invert; 3 - left
         private static readonly int DefaultHeight;
+        private DeskCell _selectedCell;
         public List<DeskCell> Cells = new List<DeskCell>();
         public List<DeskCell.DeskCellPosition> TopDefaultPositions = new List<DeskCell.DeskCellPosition>();
         public List<DeskCell.DeskCellPosition> BottomDefaultPositions = new List<DeskCell.DeskCellPosition>();
+        public List<DeskCell.DeskCellPosition> AllowedPositions = new List<DeskCell.DeskCellPosition>();
 
+        public DeskCell Get_selectedCell()
+        {
+            return _selectedCell;
+        }
 
         public static int GetMinHeight()
         {
@@ -103,7 +109,7 @@ namespace Checkers
         {
             var descCellColor = new DeskCell.DeskCellColor(((column + row) % 2) != 0);
             var descCellPosition = new DeskCell.DeskCellPosition(column, row);
-            var deskCell = new DeskCell(descCellPosition, descCellColor, null);
+            var deskCell = new DeskCell(descCellPosition, descCellColor, null, this);
             if (withCheckers)
                 deskCell.SetDefaultChecker(this);
             return deskCell;
@@ -156,9 +162,58 @@ namespace Checkers
             }
         }
 
-        public static void UnselectLastCell()
+        public void ShowAllowedPosition(DeskCell cell)
         {
-            ((MainWindow)Application.Current.MainWindow)?.Render_checkers_position(false);
+            var checker = cell.Checker;
+            var cellPosition = cell.GetCellPosition();
+            var allowRight = true;
+            var allowLeft = true;
+            DeskCell tmpCell;
+            if (cellPosition.get_column() == 0)
+                allowRight = false;
+            if (cellPosition.get_column() == Width - 1)
+                allowLeft = false;
+            if (!checker.Is_king())
+            {
+                if (allowRight)
+                {
+                    var index = (cellPosition.get_column() + cellPosition.get_row() * Width) +
+                                (CurrentWhiteTurn ? (Width - 1) : (-Width - 1));
+                    tmpCell = Cells[index];
+                    var position = tmpCell.GetCellPosition();
+                    if (tmpCell.Checker == null)
+                        AllowedPositions.Add(position);
+                }
+
+                if (allowLeft)
+                {
+                    var index = (cellPosition.get_column() + cellPosition.get_row() * Width) +
+                                (CurrentWhiteTurn ? (Width + 1) : (-Width + 1));
+                    tmpCell = Cells[index];
+                    var position = tmpCell.GetCellPosition();
+                    if (tmpCell.Checker == null)
+                        AllowedPositions.Add(position);
+                }
+            }
+            else
+            {
+            }
+        }
+
+        public void UnselectLastCell()
+        {
+            AllowedPositions.Clear();
+            _selectedCell = null;
+        }
+
+        public void ReRenderTable()
+        {
+            ((MainWindow) Application.Current.MainWindow)?.Render_checkers_position(false);
+        }
+
+        public void SetSelectedCell(DeskCell cell)
+        {
+            _selectedCell = cell;
         }
     }
 }
