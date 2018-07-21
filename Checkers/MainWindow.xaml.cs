@@ -43,7 +43,7 @@ namespace Checkers
             Ungrd.Columns = width;
             Ungrd.Rows = height;
 
-            Desk.clear_cells();
+            Desk.Clear_cells();
             Desk.Generate(true);
             Render_checkers_position(true);
         }
@@ -61,18 +61,14 @@ namespace Checkers
             }
             else
             {
-                Dispatcher.Invoke(() =>
+                for (var i = 0; i < Desk.Cells.Count; i++)
                 {
-                    for (var i = 0; i < Desk.Cells.Count; i++)
-                    {
-                        var button = Ungrd.Children[i] as Button;
+                    var button = Ungrd.Children[i] as Button;
 
-                        var btn = Desk.Cells[i].RenderDeskChellAsButton();
-                        copyControl(btn, button);
-                    }
-                });
+                    var btn = Desk.Cells[i].RenderDeskChellAsButton();
+                    copyControl(btn, button);
+                }
             }
-
         }
 
         private void copyControl(Control sourceControl, Control targetControl)

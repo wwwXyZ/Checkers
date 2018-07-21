@@ -6,19 +6,18 @@
         xmlns:local="clr-namespace:Checkers"
         mc:Ignorable="d"
         Title="Checkers" Height="394" Width="400" SizeChanged="Window_SizeChanged">
+
     <Grid>
-
-
         <DockPanel>
             <Menu DockPanel.Dock="Top">
-                <MenuItem x:Name="btn_new_game" Header="_New game" Click="btn_new_game_Click"></MenuItem>
+                <MenuItem x:Name="btn_new_game" Header="_New game" Click="btn_new_game_Click" />
                 <MenuItem Header="_Options">
-                    <MenuItem Header="_Sound"/>
-                    <MenuItem Header="Start _ML"/>
-                    <MenuItem Header="_Exit"/>
+                    <MenuItem Header="_Sound" />
+                    <MenuItem Header="Start _ML" />
+                    <MenuItem Header="_Exit" />
                 </MenuItem>
             </Menu>
-            <StackPanel></StackPanel>
+            <StackPanel />
         </DockPanel>
 
         <Grid x:Name="table" Margin="0,18,0,0">

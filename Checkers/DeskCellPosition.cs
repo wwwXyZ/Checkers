@@ -32,10 +32,9 @@ namespace Checkers
                 _row = row;
             }
 
-            public virtual bool Equals(object obj)
+            public new virtual bool Equals(object obj)
             {
-                var position = obj as DeskCellPosition;
-                return position._column == _column && position._row == _row;
+                return obj is DeskCellPosition position && (position._column == _column && position._row == _row);
             }
         }
     }

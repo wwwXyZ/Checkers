@@ -43,14 +43,16 @@ namespace Checkers
         public Button RenderDeskChellAsButton()
         {
             if (Button == null)
+            {
                 Button = new Button();
+                Button.Click += ShowAllowPosition;
+            }
+
             Button.Name = "button_" + _position.get_column() + "_" + _position.get_row();
             Button.Background = _color.get_color();
-            Button.Click += ShowAllowPosition;
             if (Checker == null) return Button;
             Button.Foreground = Checker.get_color();
             Button.Content = "***" + Environment.NewLine + "***" + Environment.NewLine + "***";
-
             return Button;
         }
 
@@ -79,9 +81,7 @@ namespace Checkers
             );
 
             if (match != null)
-            {
                 Checker = new DeskCellChecker(desk.WhiteOnTop, false);
-            }
             else
             {
                 match = desk.BottomDefaultPositions.FirstOrDefault(
@@ -89,9 +89,7 @@ namespace Checkers
                 );
 
                 if (match != null)
-                {
                     Checker = new DeskCellChecker(!desk.WhiteOnTop, false);
-                }
             }
         }
     }

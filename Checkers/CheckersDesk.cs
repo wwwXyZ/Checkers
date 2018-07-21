@@ -89,12 +89,12 @@ namespace Checkers
             }
         }
 
-        private void add_cell(DeskCell cell)
+        private void Add_cell(DeskCell cell)
         {
             Cells.Add(cell);
         }
 
-        public void clear_cells()
+        public void Clear_cells()
         {
             Cells.Clear();
         }
@@ -118,7 +118,7 @@ namespace Checkers
                     {
                         for (var row = Height - 1; row >= 0; row--)
                         {
-                            add_cell(ConstructCell(row, column, withCeckers));
+                            Add_cell(ConstructCell(row, column, withCeckers));
                         }
                     }
 
@@ -128,7 +128,7 @@ namespace Checkers
                     {
                         for (var column = Width - 1; column >= 0; column--)
                         {
-                            add_cell(ConstructCell(row, column, withCeckers));
+                            Add_cell(ConstructCell(row, column, withCeckers));
                         }
                     }
 
@@ -138,7 +138,7 @@ namespace Checkers
                     {
                         for (var row = 0; row < Height; row++)
                         {
-                            add_cell(ConstructCell(row, column, withCeckers));
+                            Add_cell(ConstructCell(row, column, withCeckers));
                         }
                     }
 
@@ -148,7 +148,7 @@ namespace Checkers
                     {
                         for (var column = 0; column < Width; column++)
                         {
-                            add_cell(ConstructCell(row, column, withCeckers));
+                            Add_cell(ConstructCell(row, column, withCeckers));
                         }
                     }
 
