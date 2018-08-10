@@ -16,7 +16,6 @@ namespace Checkers
         private static readonly int MinWidth;
         private static readonly int MinHeight;
         private static readonly int DefaultWidth;
-        private int _cellsPartCount;
         public bool WhiteOnTop { get; }
         public bool CurrentWhiteTurn;
         public int Rotation { get; } // 0 - default; 1 - right; 2 - invert; 3 - left
@@ -26,6 +25,7 @@ namespace Checkers
         public List<DeskCell.DeskCellPosition> TopDefaultPositions = new List<DeskCell.DeskCellPosition>();
         public List<DeskCell.DeskCellPosition> BottomDefaultPositions = new List<DeskCell.DeskCellPosition>();
         public List<DeskCell.DeskCellPosition> AllowedPositions = new List<DeskCell.DeskCellPosition>();
+        public List<DeskCell.DeskCellPosition> BattlePositions = new List<DeskCell.DeskCellPosition>();
 
         public DeskCell Get_selectedCell()
         {
@@ -74,7 +74,7 @@ namespace Checkers
         private void Update_cellsPartCount()
         {
             // Half of Table cells only on black
-            _cellsPartCount = ((Height * Width) / 2 / 2) - Width / 2;
+//            _cellsPartCount = ((Height * Width) / 2 / 2) - Width / 2;
             GetDefaultPositions();
         }
 
@@ -165,33 +165,13 @@ namespace Checkers
         public void ShowAllowedPosition(DeskCell cell)
         {
             var checker = cell.Checker;
-            var cellPosition = cell.GetCellPosition();
-            var allowRight = true;
-            var allowLeft = true;
-            DeskCell tmpCell;
-            if (cellPosition.get_column() == 0)
-                allowRight = false;
-            if (cellPosition.get_column() == Width - 1)
-                allowLeft = false;
             if (!checker.Is_king())
             {
-                if (allowRight)
+                var neighbors = cell.GetCheckerNeighborsList(true);
+                foreach (var neighbordCell in neighbors)
                 {
-                    var index = (cellPosition.get_column() + cellPosition.get_row() * Width) +
-                                (CurrentWhiteTurn ? (Width - 1) : (-Width - 1));
-                    tmpCell = Cells[index];
-                    var position = tmpCell.GetCellPosition();
-                    if (tmpCell.Checker == null)
-                        AllowedPositions.Add(position);
-                }
-
-                if (allowLeft)
-                {
-                    var index = (cellPosition.get_column() + cellPosition.get_row() * Width) +
-                                (CurrentWhiteTurn ? (Width + 1) : (-Width + 1));
-                    tmpCell = Cells[index];
-                    var position = tmpCell.GetCellPosition();
-                    if (tmpCell.Checker == null)
+                    var position = neighbordCell.GetCellPosition();
+                    if (neighbordCell.Checker == null)
                         AllowedPositions.Add(position);
                 }
             }
@@ -214,6 +194,40 @@ namespace Checkers
         public void SetSelectedCell(DeskCell cell)
         {
             _selectedCell = cell;
+        }
+
+        public void CheckIfNeedBeate()
+        {
+            BattlePositions.Clear();
+            foreach (var cell in Cells)
+            {
+                var currentChecker = cell.Checker;
+                if (currentChecker == null || currentChecker.Is_white() != CurrentWhiteTurn) continue;
+                var diagonals = cell.GetCellDiagonals();
+                foreach (var diagonal in diagonals)
+                {
+                    var enemyCheckersCount = 0;
+                    foreach (var deskCell in diagonal.Cells)
+                    {
+                        if (deskCell == cell)
+                            continue;
+                        var viewedChecker = deskCell.Checker;
+                        if (viewedChecker == null)
+                        {
+                            if (enemyCheckersCount >= 1)
+                            {
+                                BattlePositions.Add(deskCell.GetCellPosition());
+                            }
+                            if (!currentChecker.Is_king())
+                                break;
+                        }
+
+                        if (viewedChecker != null && viewedChecker.Is_white() == currentChecker.Is_white())
+                            break;
+                        ++enemyCheckersCount;
+                    }
+                }
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Checkers
                 _isWhite = isWhite;
             }
 
-            public SolidColorBrush get_color()
+            public SolidColorBrush Get_color()
             {
                 return _isWhite ? Brushes.Bisque : Brushes.BurlyWood;
             }

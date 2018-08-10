@@ -64,7 +64,7 @@ namespace Checkers
             else
                 Button.Background = _parent.AllowedPositions.Contains(GetCellPosition())
                     ? AllowedPositionColor
-                    : _color.get_color();
+                    : _color.Get_color();
 
             if (Checker == null)
             {
@@ -100,6 +100,7 @@ namespace Checkers
                             _position.get_row() == 0
                         ))
                         Checker.SetAsKing();
+                    _parent.CheckIfNeedBeate();
                     _parent.CurrentWhiteTurn = !_parent.CurrentWhiteTurn;
                     _parent.UnselectLastCell();
                     _parent.ReRenderTable();
@@ -113,9 +114,18 @@ namespace Checkers
             if (Checker != null && ((_parent.CurrentWhiteTurn && Checker.Is_white()) ||
                                     (!_parent.CurrentWhiteTurn && !Checker.Is_white())))
             {
+                _parent.CheckIfNeedBeate();
                 _parent.UnselectLastCell();
                 _parent.SetSelectedCell(this);
-                _parent.ShowAllowedPosition(this);
+                if (_parent.BattlePositions.Count > 0)
+                {
+                    var diagonals = GetCellDiagonals();
+
+                }
+                else
+                {
+                    _parent.ShowAllowedPosition(this);
+                }
             }
 
             _parent.ReRenderTable();
@@ -140,6 +150,127 @@ namespace Checkers
                 if (match != null)
                     Checker = new DeskCellChecker(!desk.WhiteOnTop, false);
             }
+        }
+
+        public List<DeskCell> GetCheckerNeighborsList(bool onlyFront)
+        {
+            var neighbors = new List<DeskCell>();
+            if (Checker == null) return neighbors;
+
+            var allowRight = true;
+            var allowLeft = true;
+            int currentIndex = (_position.get_column() + _position.get_row() * _parent.Width);
+            DeskCell neighbordCell;
+            if (_position.get_column() == 0)
+                allowRight = false;
+            if (_position.get_column() == _parent.Width - 1)
+                allowLeft = false;
+            if (allowRight)
+            {
+                var index = currentIndex + (_parent.CurrentWhiteTurn ? (_parent.Width - 1) : (-_parent.Width - 1));
+                neighbordCell = _parent.Cells[index];
+                neighbors.Add(neighbordCell);
+            }
+
+            if (allowLeft)
+            {
+                var index = currentIndex + (_parent.CurrentWhiteTurn ? (_parent.Width + 1) : (-_parent.Width + 1));
+                neighbordCell = _parent.Cells[index];
+                neighbors.Add(neighbordCell);
+            }
+
+            return neighbors;
+        }
+
+        public List<DeskCellDiagonal> GetCellDiagonals()
+        {
+            var diagonals = new List<DeskCellDiagonal>();
+            var diagonal = new DeskCellDiagonal(2);
+            var existNextCell = true;
+            var currentCell = this;
+            var isCurrentCell = true;
+            while (existNextCell) // collecting cells to left bottom
+            {
+                var currentCellPosition = currentCell.GetCellPosition();
+                var nextPosition = (currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) + _parent.Width - 1;
+                if (currentCellPosition.get_column() == 0 || nextPosition > _parent.Width * _parent.Height - 1)
+                    existNextCell = false;
+                else
+                {
+                    if (isCurrentCell)
+                        isCurrentCell = false;
+                    else
+                        diagonal.AddCell(currentCell);
+                    currentCell = _parent.Cells[nextPosition];
+                }
+            }
+
+            diagonals.Add(diagonal);
+
+            diagonal = new DeskCellDiagonal(1);
+            currentCell = this;
+            isCurrentCell = true;
+            existNextCell = true;
+            while (existNextCell) //collecting cells to right top
+            {
+                var currentCellPosition = currentCell.GetCellPosition();
+                var nextPosition = (currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) - _parent.Width + 1;
+                if (currentCellPosition.get_column() == _parent.Width - 1 || nextPosition < 0)
+                    existNextCell = false;
+                else
+                {
+                    if (isCurrentCell)
+                        isCurrentCell = false;
+                    else
+                        diagonal.AddCell(currentCell);
+                    currentCell = _parent.Cells[nextPosition];
+                }
+            }
+
+            diagonals.Add(diagonal);
+
+
+            diagonal = new DeskCellDiagonal(3);
+            existNextCell = true;
+            currentCell = this;
+            isCurrentCell = true;
+            while (existNextCell) // collecting cells right bottom
+            {
+                var currentCellPosition = currentCell.GetCellPosition();
+                if (currentCellPosition.get_column() == _parent.Width - 1 || currentCellPosition.get_row() == 0)
+                    existNextCell = false;
+                else
+                {
+                    if (isCurrentCell)
+                        isCurrentCell = false;
+                    else
+                        diagonal.AddCell(currentCell);
+                    currentCell = _parent.Cells[(currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) - _parent.Width + 1];
+                }
+            }
+
+            diagonal = new DeskCellDiagonal(0);
+            currentCell = this;
+            isCurrentCell = true;
+            existNextCell = true;
+            while (existNextCell) //collecting cells to left top
+            {
+                var currentCellPosition = currentCell.GetCellPosition();
+                var nextPosition = (currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) - _parent.Width - 1;
+                if (currentCellPosition.get_column() == 0 || nextPosition < 0)
+                    existNextCell = false;
+                else
+                {
+                    if (isCurrentCell)
+                        isCurrentCell = false;
+                    else
+                        diagonal.AddCell(currentCell);
+                    currentCell = _parent.Cells[nextPosition];
+                }
+            }
+
+            diagonals.Add(diagonal);
+            return diagonals;
         }
     }
 }

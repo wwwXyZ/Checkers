@@ -71,7 +71,7 @@ namespace Checkers
             }
         }
 
-        private void CopyControl(Control sourceControl, Control targetControl)
+        protected virtual void CopyControl(Control sourceControl, Control targetControl)
         {
             // make sure these are the same
             if (sourceControl.GetType() != targetControl.GetType())
