@@ -9,7 +9,7 @@ namespace Checkers
             private readonly bool _isWhite;
 
 
-            public bool get_isWhite()
+            public bool Get_isWhite()
             {
                 return _isWhite;
             }

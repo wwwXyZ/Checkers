@@ -13,9 +13,9 @@ namespace Checkers
             _isKing = isKing;
         }
 
-        public SolidColorBrush get_color()
+        public SolidColorBrush Get_color()
         {
-            return is_white ? Brushes.CadetBlue : Brushes.BlueViolet;
+            return is_white ? Brushes.DeepPink : Brushes.BlueViolet;
         }
 
         public bool Is_king()

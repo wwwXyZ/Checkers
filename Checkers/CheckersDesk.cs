@@ -19,13 +19,13 @@ namespace Checkers
         public bool WhiteOnTop { get; }
         public bool CurrentWhiteTurn;
         public int Rotation { get; } // 0 - default; 1 - right; 2 - invert; 3 - left
+        public bool NeedBeat { get; set; }
         private static readonly int DefaultHeight;
         private DeskCell _selectedCell;
         public List<DeskCell> Cells = new List<DeskCell>();
         public List<DeskCell.DeskCellPosition> TopDefaultPositions = new List<DeskCell.DeskCellPosition>();
         public List<DeskCell.DeskCellPosition> BottomDefaultPositions = new List<DeskCell.DeskCellPosition>();
         public List<DeskCell.DeskCellPosition> AllowedPositions = new List<DeskCell.DeskCellPosition>();
-        public List<DeskCell.DeskCellPosition> BattlePositions = new List<DeskCell.DeskCellPosition>();
 
         public DeskCell Get_selectedCell()
         {
@@ -198,35 +198,13 @@ namespace Checkers
 
         public void CheckIfNeedBeate()
         {
-            BattlePositions.Clear();
+            NeedBeat = false;
             foreach (var cell in Cells)
             {
-                var currentChecker = cell.Checker;
-                if (currentChecker == null || currentChecker.Is_white() != CurrentWhiteTurn) continue;
-                var diagonals = cell.GetCellDiagonals();
-                foreach (var diagonal in diagonals)
-                {
-                    var enemyCheckersCount = 0;
-                    foreach (var deskCell in diagonal.Cells)
-                    {
-                        if (deskCell == cell)
-                            continue;
-                        var viewedChecker = deskCell.Checker;
-                        if (viewedChecker == null)
-                        {
-                            if (enemyCheckersCount >= 1)
-                            {
-                                BattlePositions.Add(deskCell.GetCellPosition());
-                            }
-                            if (!currentChecker.Is_king())
-                                break;
-                        }
-
-                        if (viewedChecker != null && viewedChecker.Is_white() == currentChecker.Is_white())
-                            break;
-                        ++enemyCheckersCount;
-                    }
-                }
+                var battleCells = cell.GetBattleCells();
+                if (battleCells.Count == 0) continue;
+                NeedBeat = true;
+                break;
             }
         }
     }

@@ -73,7 +73,7 @@ namespace Checkers
             }
             else
             {
-                Button.Foreground = Checker.get_color();
+                Button.Foreground = Checker.Get_color();
                 //            Button.Content = "***" + Environment.NewLine + "***";
                 Button.Content = "C:" + _position.get_column() + Environment.NewLine + "R:" + _position.get_row();
             }
@@ -91,7 +91,8 @@ namespace Checkers
                     var cell = _parent.Get_selectedCell();
                     Checker = cell.Checker;
                     var position = cell.GetCellPosition();
-                    _parent.Cells[position.get_row() * _parent.Width + position.get_column()].Checker = null;
+                    var startCell = _parent.Cells[position.get_row() * _parent.Width + position.get_column()];
+                    startCell.Checker = null;
                     if (!Checker.Is_king() &&
                         (
                             _parent.CurrentWhiteTurn && Checker.Is_white() &&
@@ -100,9 +101,35 @@ namespace Checkers
                             _position.get_row() == 0
                         ))
                         Checker.SetAsKing();
-                    _parent.CheckIfNeedBeate();
-                    _parent.CurrentWhiteTurn = !_parent.CurrentWhiteTurn;
-                    _parent.UnselectLastCell();
+                    if (_parent.NeedBeat)
+                    {
+                        //remove Checkers between startCell and cell
+                        var diagonals = startCell.GetCellDiagonals();
+                        DeskCellDiagonal selectedDiagonal = null;
+                        foreach (var diagonal in diagonals)
+                        {
+                            if (!diagonal.Cells.Contains(cell)) continue;
+                            selectedDiagonal = diagonal;
+                            break;
+                        }
+
+                        if (selectedDiagonal != null)
+                            foreach (var deskCell in selectedDiagonal.Cells)
+                            {
+                                if(deskCell == cell) break;
+                                _parent.Cells[deskCell.GetCellPosition().get_row() * _parent.Width + deskCell.GetCellPosition().get_column()].Checker = null;
+                            }
+
+                        Click(sender, e);
+                        _parent.CheckIfNeedBeate();
+                        _parent.ReRenderTable();
+                    }
+                    else
+                    {
+                        _parent.CurrentWhiteTurn = !_parent.CurrentWhiteTurn;
+                        _parent.UnselectLastCell();
+                    }
+
                     _parent.ReRenderTable();
                     return;
                 }
@@ -117,10 +144,13 @@ namespace Checkers
                 _parent.CheckIfNeedBeate();
                 _parent.UnselectLastCell();
                 _parent.SetSelectedCell(this);
-                if (_parent.BattlePositions.Count > 0)
+                if (_parent.NeedBeat)
                 {
-                    var diagonals = GetCellDiagonals();
-
+                    var allowedPositionsCells = GetBattleCells();
+                    foreach (var cell in allowedPositionsCells)
+                    {
+                        _parent.AllowedPositions.Add(cell._position);
+                    }
                 }
                 else
                 {
@@ -133,7 +163,7 @@ namespace Checkers
 
         public void SetDefaultChecker(CheckersDesk desk)
         {
-            if (GetCellColor().get_isWhite()) return;
+            if (GetCellColor().Get_isWhite()) return;
             var cp = GetCellPosition();
             var match = desk.TopDefaultPositions.FirstOrDefault(
                 position => position.Equals(cp)
@@ -237,7 +267,7 @@ namespace Checkers
             while (existNextCell) // collecting cells right bottom
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                if (currentCellPosition.get_column() == _parent.Width - 1 || currentCellPosition.get_row() == 0)
+                if (currentCellPosition.get_column() == _parent.Width - 1 || currentCellPosition.get_row() == _parent.Width - 1)
                     existNextCell = false;
                 else
                 {
@@ -245,9 +275,11 @@ namespace Checkers
                         isCurrentCell = false;
                     else
                         diagonal.AddCell(currentCell);
-                    currentCell = _parent.Cells[(currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) - _parent.Width + 1];
+                    currentCell = _parent.Cells[(currentCellPosition.get_column() + currentCellPosition.get_row() * _parent.Width) + _parent.Width + 1];
                 }
             }
+
+            diagonals.Add(diagonal);
 
             diagonal = new DeskCellDiagonal(0);
             currentCell = this;
@@ -271,6 +303,40 @@ namespace Checkers
 
             diagonals.Add(diagonal);
             return diagonals;
+        }
+
+        public List<DeskCell> GetBattleCells()
+        {
+            var battleCells = new List<DeskCell>();
+            var currentChecker = Checker;
+            if (currentChecker == null || currentChecker.Is_white() != _parent.CurrentWhiteTurn) return battleCells;
+            var diagonals = GetCellDiagonals();
+            foreach (var diagonal in diagonals)
+            {
+                var enemyCheckersCount = 0;
+                foreach (var deskCell in diagonal.Cells)
+                {
+                    if (deskCell == this)
+                        continue;
+                    var viewedChecker = deskCell.Checker;
+                    if (viewedChecker == null)
+                    {
+                        if (enemyCheckersCount >= 1)
+                        {
+                            battleCells.Add(deskCell);
+                        }
+
+                        if (!currentChecker.Is_king())
+                            break;
+                    }
+
+                    if (viewedChecker != null && viewedChecker.Is_white() == currentChecker.Is_white())
+                        break;
+                    ++enemyCheckersCount;
+                }
+            }
+
+            return battleCells;
         }
     }
 }
