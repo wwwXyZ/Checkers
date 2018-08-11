@@ -22,22 +22,22 @@ namespace Checkers
     /// </summary>
     public partial class MainWindow : Window
     {
-        public CheckersDesk Desk;
+        public Desk Desk;
 
         public MainWindow()
         {
             InitializeComponent();
             // Generate checkers grid
-            Desk = new CheckersDesk();
-            generate_grid();
+            Desk = new Desk();
+            GenerateGrid();
         }
 
         private void btn_new_game_Click(object sender, RoutedEventArgs e)
         {
-            generate_grid();
+            GenerateGrid();
         }
 
-        public void generate_grid()
+        public void GenerateGrid()
         {
             var width = Desk.Width;
             var height = Desk.Height;
@@ -54,21 +54,11 @@ namespace Checkers
             {
                 Ungrd.Children.Clear();
                 foreach (var cell in Desk.Cells)
-                {
-                    var button = cell.RenderDeskChellAsButton();
-                    Ungrd.Children.Add(button);
-                }
+                    Ungrd.Children.Add(cell.RenderDeskChellAsButton());
             }
             else
-            {
                 for (var i = 0; i < Desk.Cells.Count; i++)
-                {
-                    var button = Ungrd.Children[i] as Button;
-
-                    var btn = Desk.Cells[i].RenderDeskChellAsButton();
-                    CopyControl(btn, button);
-                }
-            }
+                    CopyControl(Desk.Cells[i].RenderDeskChellAsButton(), Ungrd.Children[i] as Button);
         }
 
         protected virtual void CopyControl(Control sourceControl, Control targetControl)
@@ -81,9 +71,9 @@ namespace Checkers
 
             foreach (PropertyInfo sourceProperty in sourceControl.GetType().GetProperties())
             {
-                object newValue = sourceProperty.GetValue(sourceControl, null);
+                var newValue = sourceProperty.GetValue(sourceControl, null);
 
-                MethodInfo mi = sourceProperty.GetSetMethod(true);
+                var mi = sourceProperty.GetSetMethod(true);
                 if (mi != null)
                 {
                     sourceProperty.SetValue(targetControl, newValue, null);
@@ -95,7 +85,7 @@ namespace Checkers
         {
             if (Width / Height != 1)
             {
-                this.Width = this.Height;
+                Width = Height;
             }
         }
     }

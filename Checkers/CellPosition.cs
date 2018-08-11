@@ -2,20 +2,20 @@
 
 namespace Checkers
 {
-    public partial class DeskCell
+    public partial class Cell
     {
-        public class DeskCellPosition
+        public class CellPosition
         {
             private readonly int _column;
             private readonly int _row;
 
 
-            public int get_row()
+            public int Get_row()
             {
                 return _row;
             }
 
-            public int get_column()
+            public int Get_column()
             {
                 return _column;
             }
@@ -26,7 +26,7 @@ namespace Checkers
                 return position;
             }
 
-            public DeskCellPosition(int column, int row)
+            public CellPosition(int column, int row)
             {
                 _column = column;
                 _row = row;
@@ -34,7 +34,7 @@ namespace Checkers
 
             public new virtual bool Equals(object obj)
             {
-                return obj is DeskCellPosition position && (position._column == _column && position._row == _row);
+                return obj is CellPosition position && (position._column == _column && position._row == _row);
             }
         }
     }

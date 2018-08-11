@@ -2,9 +2,9 @@
 
 namespace Checkers
 {
-    public partial class DeskCell
+    public partial class Cell
     {
-        public class DeskCellColor
+        public class CellColor
         {
             private readonly bool _isWhite;
 
@@ -14,7 +14,7 @@ namespace Checkers
                 return _isWhite;
             }
 
-            public DeskCellColor(bool isWhite)
+            public CellColor(bool isWhite)
             {
                 _isWhite = isWhite;
             }

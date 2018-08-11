@@ -82,12 +82,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CheckersDesk.cs" />
-    <Compile Include="DeskCell.cs" />
-    <Compile Include="DeskCellChecker.cs" />
-    <Compile Include="DeskCellColor.cs" />
-    <Compile Include="DeskCellDiagonal.cs" />
-    <Compile Include="DeskCellPosition.cs" />
+    <Compile Include="Desk.cs" />
+    <Compile Include="Cell.cs" />
+    <Compile Include="Checker.cs" />
+    <Compile Include="CellColor.cs" />
+    <Compile Include="Diagonal.cs" />
+    <Compile Include="CellPosition.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -2,17 +2,17 @@
 
 namespace Checkers
 {
-    public class DeskCellDiagonal
+    public class Diagonal
     {
-        public List<DeskCell> Cells = new List<DeskCell>();
+        public List<Cell> Cells = new List<Cell>();
         private readonly int _direction; // 0 - left top; 1 - right top; 2 - left botom; 3 - right botom
 
-        public DeskCellDiagonal(int direction)
+        public Diagonal(int direction)
         {
             _direction = direction;
         }
 
-        public void AddCell(DeskCell cell)
+        public void AddCell(Cell cell)
         {
             Cells.Add(cell);
         }
