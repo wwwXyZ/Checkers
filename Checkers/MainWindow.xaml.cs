@@ -45,13 +45,14 @@ namespace Checkers
             Ungrd.Rows = height;
             Desk.Clear_cells();
             Desk.Generate(true);
-            Render_checkers_position(true);
+            RenderBattlefield(true);
         }
 
         public void Render_checkers_position(bool viaClear)
         {
             if (viaClear)
             {
+                LbWin.Visibility = Visibility.Hidden;
                 Ungrd.Children.Clear();
                 foreach (var cell in Desk.Cells)
                     Ungrd.Children.Add(cell.RenderDeskChellAsButton());
@@ -59,6 +60,40 @@ namespace Checkers
             else
                 for (var i = 0; i < Desk.Cells.Count; i++)
                     CopyControl(Desk.Cells[i].RenderDeskChellAsButton(), Ungrd.Children[i] as Button);
+        }
+
+        public void RenderBattlefield(bool viaClear)
+        {
+            Render_checkers_position(viaClear);
+            var whiteCount = Desk.Get_whiteCount();
+            var blackCount = Desk.Get_blackCount();
+            LbWhiteCount.Content = whiteCount;
+            LbBlackCount.Content = blackCount;
+            if (whiteCount <= 0)
+                EngGame(1);
+            if (blackCount <= 0)
+                EngGame(0);
+            LbCurrentTurn.Content = Desk.CurrentWhiteTurn ? "White" : "Black";
+        }
+
+        public void EngGame(int condition) // 0 - BLACK WIN; 1 - WHITE WIN; -1 - DRAW
+        {
+            var content = "";
+            switch (condition)
+            {
+                case 0:
+                    content = "BLACK IS WIN!";
+                    break;
+                case 1:
+                    content = "WHITE IS WIN!";
+                    break;
+                default:
+                    content = "DRAW :(";
+                    break;
+            }
+
+            LbWin.Content = content;
+            LbWin.Visibility = Visibility.Visible;
         }
 
         protected virtual void CopyControl(Control sourceControl, Control targetControl)
@@ -83,6 +118,7 @@ namespace Checkers
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (Width / Height != 1)
             {
                 Width = Height;

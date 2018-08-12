@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows.Media;
 
 namespace Checkers
 {
@@ -16,6 +17,11 @@ namespace Checkers
         public SolidColorBrush Get_color()
         {
             return _isWhite ? Brushes.DeepPink : Brushes.BlueViolet;
+        }
+
+        public String Get_image()
+        {
+            return _isWhite ? "images/putin.png" : "images/trump.png";
         }
 
         public bool Is_Quean()

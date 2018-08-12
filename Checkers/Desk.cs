@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using FontFamily = Svg.Text.FontFamily;
 
 namespace Checkers
 {
@@ -21,6 +22,8 @@ namespace Checkers
         public bool WhiteOnTop { get; }
         public bool CurrentWhiteTurn;
         public int Rotation { get; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
+        private int _blackCount;
+        private int _whiteCount;
         public bool NeedBeat { get; set; }
 
         private Cell _selectedCell;
@@ -29,6 +32,26 @@ namespace Checkers
         public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> AllowedPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> BattleCheckerPositions = new List<Cell.CellPosition>();
+
+        public int Get_blackCount()
+        {
+            return _blackCount;
+        }
+
+        public void Set_blackCount(int value)
+        {
+            _blackCount = value;
+        }
+
+        public int Get_whiteCount()
+        {
+            return _whiteCount;
+        }
+
+        public void Set_whiteCount(int value)
+        {
+            _whiteCount = value;
+        }
 
         public Cell Get_selectedCell()
         {
@@ -93,11 +116,18 @@ namespace Checkers
 
         private void Add_cell(Cell cell)
         {
+            if (cell.Checker != null)
+                if (cell.Checker.Get_isWhite())
+                    Set_whiteCount(_whiteCount + 1);
+                else
+                    Set_blackCount(_blackCount + 1);
             Cells.Add(cell);
         }
 
         public void Clear_cells()
         {
+            Set_blackCount(0);
+            Set_whiteCount(0);
             Cells.Clear();
         }
 
@@ -176,8 +206,8 @@ namespace Checkers
                 foreach (var diagonal in diagonals)
                 foreach (var diagonalCell in diagonal.Cells)
                 {
-                    if (diagonalCell.Checker == null)
-                        AllowedPositions.Add(diagonalCell.GetCellPosition());
+                    if (diagonalCell.Checker != null) break;
+                    AllowedPositions.Add(diagonalCell.GetCellPosition());
                 }
             }
         }
@@ -190,7 +220,7 @@ namespace Checkers
 
         public void ReRenderTable()
         {
-            ((MainWindow) Application.Current.MainWindow)?.Render_checkers_position(false);
+            ((MainWindow) Application.Current.MainWindow)?.RenderBattlefield(false);
         }
 
         public void SetSelectedCell(Cell cell)

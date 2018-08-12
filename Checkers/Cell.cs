@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace Checkers
@@ -46,6 +48,17 @@ namespace Checkers
             return _position;
         }
 
+        public StackPanel ConstructStackPanel(string imageSource)
+        {
+            var stackPnl = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0)
+            };
+            stackPnl.Children.Add(new Image {Source = new BitmapImage(new Uri(imageSource, UriKind.RelativeOrAbsolute))});
+            return stackPnl;
+        }
+
         public Button RenderDeskChellAsButton()
         {
             if (Button == null)
@@ -74,13 +87,14 @@ namespace Checkers
             }
             else
             {
-                Button.Foreground = Checker.Get_color();
+//                Button.Foreground = Checker.Get_image();
                 //            Button.Content = "***" + Environment.NewLine + "***";
-                Button.Content = "C:" + _position.Get_column() + Environment.NewLine + "R:" + _position.Get_row();
+
+                Button.Content = ConstructStackPanel(Checker.Get_image());
             }
 
             if (_desk.BattleCheckerPositions.Contains(_position))
-                Button.Foreground = Brushes.Black;
+                Button.Background = Brushes.Red;
 
             return Button;
         }
@@ -121,7 +135,12 @@ namespace Checkers
                         {
                             foreach (var deskCell in selectedDiagonal.Cells)
                             {
+                                if(_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker == null) continue;
                                 if (deskCell == this) break;
+                                if (_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.Get_isWhite())
+                                    _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
+                                else
+                                    _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                                 _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker = null;
                             }
                         }

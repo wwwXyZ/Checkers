@@ -12,3 +12,9 @@ c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\
 c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.exe
 c:\users\wwwxyz\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.pdb
 C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.csprojResolveAssemblyReference.cache
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Svg.dll
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Svg.pdb
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Svg.xml
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.dll
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.pdb
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.xml

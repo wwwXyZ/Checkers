@@ -34,7 +34,7 @@
     <Grid>
         <DockPanel>
             <Menu DockPanel.Dock="Top">
-                <MenuItem x:Name="btn_new_game" Header="_New game" Click="btn_new_game_Click" />
+                <MenuItem x:Name="BtnNewGame" Header="_New game" Click="btn_new_game_Click" />
                 <MenuItem Header="_Options">
                     <MenuItem Header="_Sound" />
                     <MenuItem Header="Start _ML" />
@@ -44,8 +44,35 @@
             <StackPanel />
         </DockPanel>
 
-        <Grid x:Name="table" Margin="0,18,0,0">
-            <UniformGrid x:Name="Ungrd" Rows="8" Columns="8" Margin="61,24,51,41" />
+        <Grid x:Name="Table" Margin="0,18,0,0">
+            <UniformGrid x:Name="Ungrd" Rows="8" Columns="8" Margin="10,10,112,65" />
+            <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Right" Margin="0,10,10,0" Width="87"
+                    Height="173" VerticalAlignment="Top">
+                <Grid Margin="-1,1,1,-1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="9*"/>
+                        <RowDefinition Height="34*"/>
+                    </Grid.RowDefinitions>
+                    <Label Content="Status" HorizontalAlignment="Center" Margin="10,10,10,0" VerticalAlignment="Top"
+                           RenderTransformOrigin="-0.64,2.286" Width="65" HorizontalContentAlignment="Center" Grid.RowSpan="2" />
+                    <Rectangle HorizontalAlignment="Stretch" Fill="Black" Height="1" Margin="0,6.5,0,127" Grid.Row="1" />
+                    <Label Content="White:" HorizontalAlignment="Left" Margin="10,12.5,0,0" VerticalAlignment="Top" Grid.Row="1" />
+                    <Label x:Name="LbWhiteCount" Content="0" HorizontalAlignment="Right" Margin="0,12,5,0" Width="25"
+                           HorizontalContentAlignment="Stretch" VerticalAlignment="Top" RenderTransformOrigin="1.171,0.72" Grid.Row="1" />
+                    <Label Content="Black:" HorizontalAlignment="Left" Margin="10,43.5,0,0" VerticalAlignment="Top" Grid.Row="1" />
+                    <Label x:Name="LbBlackCount" Content="0" HorizontalAlignment="Right" Margin="0,44,0,0" Width="30"
+                           HorizontalContentAlignment="Stretch" VerticalAlignment="Top" RenderTransformOrigin="1.171,0.72" Grid.Row="1" />
+                    <Rectangle HorizontalAlignment="Stretch" Fill="Black" Height="1" Margin="0,74.5,0,60" Grid.Row="1" />
+                    <Label Content="Current&#xD;&#xA;Turn:" HorizontalAlignment="Left" Margin="10,80,0,0" Width="56"
+                           HorizontalContentAlignment="Stretch" VerticalAlignment="Top" Grid.Row="1" />
+                    <Label x:Name="LbCurrentTurn" Content="" HorizontalAlignment="Left" Margin="44,96,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+                </Grid>
+            </Border>
+            <Label Visibility="Hidden" x:Name="LbWin" Content="" Margin="47,0,144,10" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="24" FontWeight="Bold" Background="#FF9C5252" Height="50" VerticalAlignment="Bottom">
+                <Label.Foreground>
+                    <SolidColorBrush Color="#FF2E1F70"/>
+                </Label.Foreground>
+            </Label>
         </Grid>
 
 
