@@ -20,7 +20,7 @@ namespace Checkers
 
         public bool WhiteOnTop { get; }
         public bool CurrentWhiteTurn;
-        public int Rotation { get; }            // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
+        public int Rotation { get; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
         public bool NeedBeat { get; set; }
 
         private Cell _selectedCell;
@@ -28,6 +28,7 @@ namespace Checkers
         public List<Cell.CellPosition> TopDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> AllowedPositions = new List<Cell.CellPosition>();
+        public List<Cell.CellPosition> BattleCheckerPositions = new List<Cell.CellPosition>();
 
         public Cell Get_selectedCell()
         {
@@ -165,13 +166,19 @@ namespace Checkers
                 var neighbors = cell.GetCheckerNeighborsList(true);
                 foreach (var neighbordCell in neighbors)
                 {
-                    var position = neighbordCell.GetCellPosition();
                     if (neighbordCell.Checker == null)
-                        AllowedPositions.Add(position);
+                        AllowedPositions.Add(neighbordCell.GetCellPosition());
                 }
             }
             else
             {
+                var diagonals = cell.GetCellDiagonals();
+                foreach (var diagonal in diagonals)
+                foreach (var diagonalCell in diagonal.Cells)
+                {
+                    if (diagonalCell.Checker == null)
+                        AllowedPositions.Add(diagonalCell.GetCellPosition());
+                }
             }
         }
 
@@ -199,8 +206,15 @@ namespace Checkers
                 var battleCells = cell.GetBattleCells();
                 if (battleCells.Count == 0) continue;
                 NeedBeat = true;
-                break;
             }
+        }
+
+        public void CheckIfNeedBeate(Cell cell)
+        {
+            NeedBeat = false;
+
+            var battleCells = cell.GetBattleCells();
+            NeedBeat = battleCells.Count > 0;
         }
     }
 }

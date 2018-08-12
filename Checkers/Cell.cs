@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -22,7 +23,6 @@ namespace Checkers
         public SolidColorBrush AllowedPositionColor;
         public Button Button;
         private readonly Desk _desk;
-        public bool Tmp;
 
         public Cell(CellPosition position, CellColor color, Checker checker, Desk desk)
         {
@@ -79,116 +79,94 @@ namespace Checkers
                 Button.Content = "C:" + _position.Get_column() + Environment.NewLine + "R:" + _position.Get_row();
             }
 
-            if (Tmp)
-                Button.Background = Brushes.Black;
+            if (_desk.BattleCheckerPositions.Contains(_position))
+                Button.Foreground = Brushes.Black;
 
             return Button;
         }
 
         private void Click(object sender, RoutedEventArgs e)
         {
-            foreach (var cell in _desk.Cells)
+            if (Checker == null)
             {
-                cell.Tmp = false;
-            }
-
-            var position = GetCellPosition();
-            var startCell = _desk.Cells[position.Get_row() * _desk.Width + position.Get_column()];
-            var diagonals = startCell.GetCellDiagonals();
-            Diagonal selectedDiagonal = null;
-            foreach (var diagonal in diagonals)
-            {
-                foreach (var diagonalCell in diagonal.Cells)
+                if (_desk.AllowedPositions.Contains(_position))
                 {
-                    diagonalCell.Tmp = true;
+                    // move to new position
+                    var cell = _desk.Get_selectedCell();
+                    Checker = cell.Checker;
+                    var position = cell.GetCellPosition();
+                    var startCell = _desk.Cells[position.Get_row() * _desk.Width + position.Get_column()];
+                    startCell.Checker = null;
+                    if (!Checker.Is_Quean() &&
+                        (
+                            _desk.CurrentWhiteTurn && Checker.Get_isWhite() &&
+                            _position.Get_row() == _desk.Height - 1 ||
+                            !_desk.CurrentWhiteTurn && !Checker.Get_isWhite() &&
+                            _position.Get_row() == 0
+                        ))
+                        Checker.SetAsQuean();
+                    if (_desk.NeedBeat)
+                    {
+                        //remove Checkers between startCell and cell
+                        var diagonals = startCell.GetCellDiagonals();
+                        Diagonal selectedDiagonal = null;
+                        foreach (var diagonal in diagonals)
+                        {
+                            if (!diagonal.Cells.Contains(this)) continue;
+                            selectedDiagonal = diagonal;
+                            break;
+                        }
+
+                        if (selectedDiagonal != null)
+                        {
+                            foreach (var deskCell in selectedDiagonal.Cells)
+                            {
+                                if (deskCell == this) break;
+                                _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker = null;
+                            }
+                        }
+
+                        Click(sender, e);
+                        _desk.CheckIfNeedBeate(this);
+                        _desk.ReRenderTable();
+                    }
+
+                    if (!_desk.NeedBeat)
+                    {
+                        _desk.BattleCheckerPositions.Clear();
+                        _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
+                        _desk.UnselectLastCell();
+                        _desk.CheckIfNeedBeate();
+                    }
+
+                    _desk.ReRenderTable();
+                    return;
                 }
 
-                //                            if (!diagonal.Cells.Contains(cell)) continue;
-                //                            selectedDiagonal = diagonal;
-                //                            break;
+                _desk.UnselectLastCell();
+                _desk.SetSelectedCell(this);
             }
-            //
-            //            if (Checker == null)
-            //            {
-            //                if (_desk.AllowedPositions.Contains(_position))
-            //                {
-            //                    // move to new position
-            //                    var cell = _desk.Get_selectedCell();
-            //                    Checker = cell.Checker;
-            //                    var position = cell.GetCellPosition();
-            //                    var startCell = _desk.Cells[position.Get_row() * _desk.Width + position.Get_column()];
-            //                    startCell.Checker = null;
-            //                    if (!Checker.Is_Quean() &&
-            //                        (
-            //                            _desk.CurrentWhiteTurn && Checker.Get_isWhite() &&
-            //                            _position.Get_row() == _desk.Height - 1 ||
-            //                            !_desk.CurrentWhiteTurn && !Checker.Get_isWhite() &&
-            //                            _position.Get_row() == 0
-            //                        ))
-            //                        Checker.SetAsQuean();
-            //                    if (_desk.NeedBeat)
-            //                    {
-            //                        //remove Checkers between startCell and cell
-            //                        var diagonals = startCell.GetCellDiagonals();
-            //                        Diagonal selectedDiagonal = null;
-            //                        foreach (var diagonal in diagonals)
-            //                        {
-            //                            foreach (var diagonalCell in diagonal.Cells)
-            //                            {
-            //                                diagonalCell.tmp = true;
-            //                            }
-            //
-            ////                            if (!diagonal.Cells.Contains(cell)) continue;
-            ////                            selectedDiagonal = diagonal;
-            ////                            break;
-            //                        }
-            //
-            //                        _desk.ReRenderTable();
-            //
-            //                        if (selectedDiagonal != null)
-            //                            foreach (var deskCell in selectedDiagonal.Cells)
-            //                            {
-            //                                if (deskCell == cell) break;
-            //                                _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker = null;
-            //                            }
-            //
-            //                        Click(sender, e);
-            //                        _desk.CheckIfNeedBeate();
-            //                        _desk.ReRenderTable();
-            //                    }
-            //                    else
-            //                    {
-            //                        _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
-            //                        _desk.UnselectLastCell();
-            //                    }
-            //
-            //                    _desk.ReRenderTable();
-            //                    return;
-            //                }
-            //
-            //                _desk.UnselectLastCell();
-            //                _desk.SetSelectedCell(this);
-            //            }
-            //
-            //            if (Checker != null && ((_desk.CurrentWhiteTurn && Checker.Get_isWhite()) ||
-            //                                    (!_desk.CurrentWhiteTurn && !Checker.Get_isWhite())))
-            //            {
-            //                _desk.CheckIfNeedBeate();
-            //                _desk.UnselectLastCell();
-            //                _desk.SetSelectedCell(this);
-            //                if (_desk.NeedBeat)
-            //                {
-            //                    var allowedPositionsCells = GetBattleCells();
-            //                    foreach (var cell in allowedPositionsCells)
-            //                    {
-            //                        _desk.AllowedPositions.Add(cell._position);
-            //                    }
-            //                }
-            //                else
-            //                {
-            //                    _desk.ShowAllowedPosition(this);
-            //                }
-            //            }
+
+            if (Checker != null && ((_desk.CurrentWhiteTurn && Checker.Get_isWhite()) ||
+                                    (!_desk.CurrentWhiteTurn && !Checker.Get_isWhite())))
+            {
+                if (Keyboard.IsKeyDown(Key.LeftAlt) && Keyboard.IsKeyDown(Key.LeftCtrl))
+                    Checker.SetAsQuean();
+                _desk.UnselectLastCell();
+                _desk.SetSelectedCell(this);
+                if (_desk.NeedBeat)
+                {
+                    var allowedPositionsCells = GetBattleCells();
+                    foreach (var cell in allowedPositionsCells)
+                    {
+                        _desk.AllowedPositions.Add(cell._position);
+                    }
+                }
+                else
+                {
+                    _desk.ShowAllowedPosition(this);
+                }
+            }
 
             _desk.ReRenderTable();
         }
@@ -247,15 +225,15 @@ namespace Checkers
         public List<Diagonal> GetCellDiagonals()
         {
             var diagonals = new List<Diagonal>();
-            var diagonal = new Diagonal(2);
+            var diagonal = new Diagonal(0);
             var existNextCell = true;
             var currentCell = this;
             var isCurrentCell = true;
-            while (existNextCell) // collecting cells to left bottom
+            while (existNextCell) // collecting cells to left top
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) + _desk.Width - 1;
-                if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() >= _desk.Height - 1)
+                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) - _desk.Width - 1;
+                if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() <= 0)
                     existNextCell = false;
                 if (isCurrentCell)
                     isCurrentCell = false;
@@ -287,6 +265,25 @@ namespace Checkers
 
             diagonals.Add(diagonal);
 
+            diagonal = new Diagonal(2);
+            currentCell = this;
+            isCurrentCell = true;
+            existNextCell = true;
+            while (existNextCell) // collecting cells to left bottom
+            {
+                var currentCellPosition = currentCell.GetCellPosition();
+                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) + _desk.Width - 1;
+                if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() >= _desk.Height - 1)
+                    existNextCell = false;
+                if (isCurrentCell)
+                    isCurrentCell = false;
+                else
+                    diagonal.AddCell(currentCell);
+                if (existNextCell)
+                    currentCell = _desk.Cells[nextPosition];
+            }
+
+            diagonals.Add(diagonal);
 
             diagonal = new Diagonal(3);
             currentCell = this;
@@ -308,25 +305,7 @@ namespace Checkers
 
             diagonals.Add(diagonal);
 
-            diagonal = new Diagonal(0);
-            currentCell = this;
-            isCurrentCell = true;
-            existNextCell = true;
-            while (existNextCell) // collecting cells to left top
-            {
-                var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) - _desk.Width - 1;
-                if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() <= 0)
-                    existNextCell = false;
-                if (isCurrentCell)
-                    isCurrentCell = false;
-                else
-                    diagonal.AddCell(currentCell);
-                if (existNextCell)
-                    currentCell = _desk.Cells[nextPosition];
-            }
 
-            diagonals.Add(diagonal);
             return diagonals;
         }
 
@@ -341,23 +320,23 @@ namespace Checkers
                 var enemyCheckersCount = 0;
                 foreach (var deskCell in diagonal.Cells)
                 {
-                    if (deskCell == this)
-                        continue;
                     var viewedChecker = deskCell.Checker;
                     if (viewedChecker == null)
                     {
-                        if (enemyCheckersCount >= 1)
+                        if (enemyCheckersCount == 1)
                         {
                             battleCells.Add(deskCell);
+                            _desk.BattleCheckerPositions.Add(_position);
                         }
 
                         if (!currentChecker.Is_Quean())
                             break;
                     }
 
-                    if (viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
+                    if (enemyCheckersCount > 1 || (viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite()))
                         break;
-                    ++enemyCheckersCount;
+                    if (viewedChecker != null)
+                        ++enemyCheckersCount;
                 }
             }
 
