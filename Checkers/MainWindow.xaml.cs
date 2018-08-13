@@ -52,6 +52,8 @@ namespace Checkers
         {
             if (viaClear)
             {
+                Desk.AllowedPositions.Clear();
+                Desk.BattleCheckerPositions.Clear();
                 LbWin.Visibility = Visibility.Hidden;
                 Ungrd.Children.Clear();
                 foreach (var cell in Desk.Cells)
@@ -70,9 +72,9 @@ namespace Checkers
             LbWhiteCount.Content = whiteCount;
             LbBlackCount.Content = blackCount;
             if (whiteCount <= 0)
-                EngGame(1);
-            if (blackCount <= 0)
                 EngGame(0);
+            if (blackCount <= 0)
+                EngGame(1);
             LbCurrentTurn.Content = Desk.CurrentWhiteTurn ? "White" : "Black";
         }
 
@@ -82,10 +84,10 @@ namespace Checkers
             switch (condition)
             {
                 case 0:
-                    content = "BLACK IS WIN!";
+                    content = "BLACK WINS!";
                     break;
                 case 1:
-                    content = "WHITE IS WIN!";
+                    content = "WHITE WINS!";
                     break;
                 default:
                     content = "DRAW :(";
@@ -123,6 +125,11 @@ namespace Checkers
             {
                 Width = Height;
             }
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Desk.Toggle_allowCheats();
         }
     }
 }

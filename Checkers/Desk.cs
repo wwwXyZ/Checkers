@@ -24,6 +24,7 @@ namespace Checkers
         public int Rotation { get; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
         private int _blackCount;
         private int _whiteCount;
+        private bool _allowCheats = true;
         public bool NeedBeat { get; set; }
 
         private Cell _selectedCell;
@@ -32,6 +33,16 @@ namespace Checkers
         public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> AllowedPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> BattleCheckerPositions = new List<Cell.CellPosition>();
+
+        public void Toggle_allowCheats()
+        {
+            _allowCheats = !_allowCheats;
+        }
+
+        public bool Get_allowCheats()
+        {
+            return _allowCheats;
+        }
 
         public int Get_blackCount()
         {
@@ -74,6 +85,7 @@ namespace Checkers
             MinHeight = 8;
             DefaultWidth = 8;
             DefaultHeight = 8;
+            DefaultHeight = 8;
         }
 
         public Desk(int width, int height, bool whiteOnTop, int rotation, bool currentWhiteTurn)
@@ -100,15 +112,15 @@ namespace Checkers
         {
             TopDefaultPositions.Clear();
             BottomDefaultPositions.Clear();
-
+            var minusRows = Height % 2 == 0 ? 0 : 1;
             for (var column = 0; column < Width; column++)
             {
                 for (var row = 0; row < Height; row++)
                 {
                     if ((column + row) % 2 != 0) continue;
-                    if (row < Width / 2 - 1)
+                    if (row < (Height - minusRows) / 2 - 1)
                         TopDefaultPositions.Add(new Cell.CellPosition(column, row));
-                    else if (row >= Width / 2 + 1)
+                    else if (row >= (Height + minusRows) / 2 + 1)
                         BottomDefaultPositions.Add(new Cell.CellPosition(column, row));
                 }
             }
@@ -190,26 +202,7 @@ namespace Checkers
 
         public void ShowAllowedPosition(Cell cell)
         {
-            var checker = cell.Checker;
-            if (!checker.Is_Quean())
-            {
-                var neighbors = cell.GetCheckerNeighborsList(true);
-                foreach (var neighbordCell in neighbors)
-                {
-                    if (neighbordCell.Checker == null)
-                        AllowedPositions.Add(neighbordCell.GetCellPosition());
-                }
-            }
-            else
-            {
-                var diagonals = cell.GetCellDiagonals();
-                foreach (var diagonal in diagonals)
-                foreach (var diagonalCell in diagonal.Cells)
-                {
-                    if (diagonalCell.Checker != null) break;
-                    AllowedPositions.Add(diagonalCell.GetCellPosition());
-                }
-            }
+            AllowedPositions.AddRange(cell.GetAllowedPositions());
         }
 
         public void UnselectLastCell()
@@ -220,6 +213,19 @@ namespace Checkers
 
         public void ReRenderTable()
         {
+            var playerCanMove = false;
+            foreach (var cell in Cells)
+            {
+                if (cell.Checker == null || cell.Checker.Get_isWhite() != CurrentWhiteTurn) continue;
+                if (cell.GetAllowedPositions().Count > 0)
+                {
+                    playerCanMove = true;
+                    break;
+                }
+            }
+
+            if (!playerCanMove)
+                ((MainWindow) Application.Current.MainWindow)?.EngGame(!CurrentWhiteTurn ? 1 : 0);
             ((MainWindow) Application.Current.MainWindow)?.RenderBattlefield(false);
         }
 

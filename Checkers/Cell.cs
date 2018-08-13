@@ -132,10 +132,9 @@ namespace Checkers
                         }
 
                         if (selectedDiagonal != null)
-                        {
                             foreach (var deskCell in selectedDiagonal.Cells)
                             {
-                                if(_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker == null) continue;
+                                if (_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker == null) continue;
                                 if (deskCell == this) break;
                                 if (_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.Get_isWhite())
                                     _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
@@ -143,7 +142,6 @@ namespace Checkers
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                                 _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker = null;
                             }
-                        }
 
                         Click(sender, e);
                         _desk.CheckIfNeedBeate(this);
@@ -166,24 +164,54 @@ namespace Checkers
                 _desk.SetSelectedCell(this);
             }
 
-            if (Checker != null && ((_desk.CurrentWhiteTurn && Checker.Get_isWhite()) ||
-                                    (!_desk.CurrentWhiteTurn && !Checker.Get_isWhite())))
+            if (Checker != null)
             {
-                if (Keyboard.IsKeyDown(Key.LeftAlt) && Keyboard.IsKeyDown(Key.LeftCtrl))
-                    Checker.SetAsQuean();
-                _desk.UnselectLastCell();
-                _desk.SetSelectedCell(this);
-                if (_desk.NeedBeat)
+                if (_desk.Get_allowCheats() && Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt)) //Cheats
                 {
-                    var allowedPositionsCells = GetBattleCells();
-                    foreach (var cell in allowedPositionsCells)
+                    if (Keyboard.IsKeyDown(Key.Q))
+                        Checker.SetAsQuean();
+                    if (Keyboard.IsKeyDown(Key.D))
                     {
-                        _desk.AllowedPositions.Add(cell._position);
+                        if (Checker.Get_isWhite())
+                            _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
+                        else
+                            _desk.Set_blackCount(_desk.Get_blackCount() - 1);
+                        Checker = null;
+                        _desk.AllowedPositions.Clear();
+                        _desk.BattleCheckerPositions.Clear();
+                        if (_desk.Get_selectedCell() != null && _desk.Get_selectedCell().Checker != null)
+                        {
+                            _desk.Get_selectedCell().GetBattleCells();
+                            if (_desk.BattleCheckerPositions.Count <= 0)
+                                _desk.Get_selectedCell().GetAllowedPositions();
+                            else
+                            {
+                                _desk.NeedBeat = true;
+                                foreach (var cell in _desk.Get_selectedCell().GetBattleCells())
+                                    _desk.AllowedPositions.Add(cell._position);
+                            }
+                        }
+
+                        _desk.ReRenderTable();
+                        return;
                     }
                 }
-                else
+
+                if (_desk.CurrentWhiteTurn && Checker.Get_isWhite() ||
+                    !_desk.CurrentWhiteTurn && !Checker.Get_isWhite())
                 {
-                    _desk.ShowAllowedPosition(this);
+                    _desk.UnselectLastCell();
+                    _desk.SetSelectedCell(this);
+                    _desk.CheckIfNeedBeate();
+                    if (_desk.NeedBeat)
+                    {
+                        var allowedPositionsCells = GetBattleCells();
+                        foreach (var cell in allowedPositionsCells) _desk.AllowedPositions.Add(cell._position);
+                    }
+                    else
+                    {
+                        _desk.ShowAllowedPosition(this);
+                    }
                 }
             }
 
@@ -199,7 +227,9 @@ namespace Checkers
             );
 
             if (match != null)
+            {
                 Checker = new Checker(desk.WhiteOnTop, false);
+            }
             else
             {
                 match = desk.BottomDefaultPositions.FirstOrDefault(
@@ -218,7 +248,7 @@ namespace Checkers
 
             var allowRight = true;
             var allowLeft = true;
-            int currentIndex = (_position.Get_column() + _position.Get_row() * _desk.Width);
+            var currentIndex = _position.Get_column() + _position.Get_row() * _desk.Width;
             Cell neighbordCell;
             if (_position.Get_column() == 0)
                 allowRight = false;
@@ -226,14 +256,14 @@ namespace Checkers
                 allowLeft = false;
             if (allowRight)
             {
-                var index = currentIndex + (_desk.CurrentWhiteTurn ? (_desk.Width - 1) : (-_desk.Width - 1));
+                var index = currentIndex + (_desk.CurrentWhiteTurn ? _desk.Width - 1 : -_desk.Width - 1);
                 neighbordCell = _desk.Cells[index];
                 neighbors.Add(neighbordCell);
             }
 
             if (allowLeft)
             {
-                var index = currentIndex + (_desk.CurrentWhiteTurn ? (_desk.Width + 1) : (-_desk.Width + 1));
+                var index = currentIndex + (_desk.CurrentWhiteTurn ? _desk.Width + 1 : -_desk.Width + 1);
                 neighbordCell = _desk.Cells[index];
                 neighbors.Add(neighbordCell);
             }
@@ -251,7 +281,7 @@ namespace Checkers
             while (existNextCell) // collecting cells to left top
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) - _desk.Width - 1;
+                var nextPosition = currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width - _desk.Width - 1;
                 if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() <= 0)
                     existNextCell = false;
                 if (isCurrentCell)
@@ -271,7 +301,7 @@ namespace Checkers
             while (existNextCell) // collecting cells to right top
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) - _desk.Width + 1;
+                var nextPosition = currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width - _desk.Width + 1;
                 if (currentCellPosition.Get_column() >= _desk.Width - 1 || currentCellPosition.Get_row() <= 0)
                     existNextCell = false;
                 if (isCurrentCell)
@@ -291,7 +321,7 @@ namespace Checkers
             while (existNextCell) // collecting cells to left bottom
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) + _desk.Width - 1;
+                var nextPosition = currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width + _desk.Width - 1;
                 if (currentCellPosition.Get_column() <= 0 || currentCellPosition.Get_row() >= _desk.Height - 1)
                     existNextCell = false;
                 if (isCurrentCell)
@@ -311,7 +341,7 @@ namespace Checkers
             while (existNextCell) // collecting cells to right bottom
             {
                 var currentCellPosition = currentCell.GetCellPosition();
-                var nextPosition = (currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width) + _desk.Width + 1;
+                var nextPosition = currentCellPosition.Get_column() + currentCellPosition.Get_row() * _desk.Width + _desk.Width + 1;
                 if (currentCellPosition.Get_column() >= _desk.Width - 1 || currentCellPosition.Get_row() >= _desk.Height - 1)
                     existNextCell = false;
                 if (isCurrentCell)
@@ -352,7 +382,7 @@ namespace Checkers
                             break;
                     }
 
-                    if (enemyCheckersCount > 1 || (viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite()))
+                    if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
                         break;
                     if (viewedChecker != null)
                         ++enemyCheckersCount;
@@ -360,6 +390,31 @@ namespace Checkers
             }
 
             return battleCells;
+        }
+
+        public List<CellPosition> GetAllowedPositions()
+        {
+            var positions = new List<CellPosition>();
+            var checker = Checker;
+            if (!checker.Is_Quean())
+            {
+                var neighbors = GetCheckerNeighborsList(true);
+                foreach (var neighbordCell in neighbors)
+                    if (neighbordCell.Checker == null)
+                        positions.Add(neighbordCell.GetCellPosition());
+            }
+            else
+            {
+                var diagonals = GetCellDiagonals();
+                foreach (var diagonal in diagonals)
+                foreach (var diagonalCell in diagonal.Cells)
+                {
+                    if (diagonalCell.Checker != null) break;
+                    positions.Add(diagonalCell.GetCellPosition());
+                }
+            }
+
+            return positions;
         }
     }
 }
