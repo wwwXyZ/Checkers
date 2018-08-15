@@ -17,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace Checkers
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public Desk Desk;
@@ -64,6 +61,13 @@ namespace Checkers
                     CopyControl(Desk.Cells[i].RenderDeskChellAsButton(), Ungrd.Children[i] as Button);
         }
 
+        private void UpdateRotation()
+        {
+            var angle = 90 * Desk.Rotation;
+            var rotateTransform = new RotateTransform {Angle = angle};
+            Ungrd.RenderTransform = rotateTransform;
+        }
+
         public void RenderBattlefield(bool viaClear)
         {
             Render_checkers_position(viaClear);
@@ -80,7 +84,7 @@ namespace Checkers
 
         public void EngGame(int condition) // 0 - BLACK WIN; 1 - WHITE WIN; -1 - DRAW
         {
-            var content = "";
+            string content;
             switch (condition)
             {
                 case 0:
@@ -130,6 +134,18 @@ namespace Checkers
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             Desk.Toggle_allowCheats();
+        }
+
+        private void LeftRotateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Desk.Rotation -= 1;
+            UpdateRotation();
+        }
+
+        private void RightRotateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Desk.Rotation += 1;
+            UpdateRotation();
         }
     }
 }

@@ -152,11 +152,13 @@ namespace Checkers
                     {
                         _desk.BattleCheckerPositions.Clear();
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
+                        _desk.EndTurn();
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
                     }
+                    else
+                        _desk.ReRenderTable();
 
-                    _desk.ReRenderTable();
                     return;
                 }
 

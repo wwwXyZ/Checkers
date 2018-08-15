@@ -21,7 +21,7 @@ namespace Checkers
 
         public bool WhiteOnTop { get; }
         public bool CurrentWhiteTurn;
-        public int Rotation { get; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
+        public int Rotation { get; set; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
         private int _blackCount;
         private int _whiteCount;
         private bool _allowCheats = true;
@@ -83,9 +83,8 @@ namespace Checkers
         {
             MinWidth = 8;
             MinHeight = 8;
-            DefaultWidth = 8;
-            DefaultHeight = 8;
-            DefaultHeight = 8;
+            DefaultWidth = 6;
+            DefaultHeight = 6;
         }
 
         public Desk(int width, int height, bool whiteOnTop, int rotation, bool currentWhiteTurn)
@@ -117,7 +116,7 @@ namespace Checkers
             {
                 for (var row = 0; row < Height; row++)
                 {
-                    if ((column + row) % 2 != 0) continue;
+                    if ((column + row) % 2 == 0) continue;
                     if (row < (Height - minusRows) / 2 - 1)
                         TopDefaultPositions.Add(new Cell.CellPosition(column, row));
                     else if (row >= (Height + minusRows) / 2 + 1)
@@ -145,7 +144,7 @@ namespace Checkers
 
         private Cell ConstructCell(int row, int column, bool withCheckers)
         {
-            var cellColor = new Cell.CellColor(((column + row) % 2) != 0);
+            var cellColor = new Cell.CellColor(((column + row) % 2) == 0);
             var cellPosition = new Cell.CellPosition(column, row);
             var deskCell = new Cell(cellPosition, cellColor, null, this);
             if (withCheckers)
@@ -155,49 +154,50 @@ namespace Checkers
 
         public void Generate(bool withCeckers)
         {
-            switch (Rotation)
+//           switch (Rotation)
+//            {
+//                case 1: // right
+//                    for (var column = 0; column < Width; column++)
+//                    {
+//                        for (var row = Height - 1; row >= 0; row--)
+//                        {
+//                            Add_cell(ConstructCell(row, column, withCeckers));
+//                        }
+//                    }
+//
+//                    break;
+//                case 2: // invert
+//                    for (var row = Height - 1; row >= 0; row--)
+//                    {
+//                        for (var column = Width - 1; column >= 0; column--)
+//                        {
+//                            Add_cell(ConstructCell(row, column, withCeckers));
+//                        }
+//                    }
+//
+//                    break;
+//                case 3: // left
+//                    for (var column = Width - 1; column >= 0; column--)
+//                    {
+//                        for (var row = 0; row < Height; row++)
+//                        {
+//                            Add_cell(ConstructCell(row, column, withCeckers));
+//                        }
+//                    }
+//
+//                    break;
+//                default: // 0 or default
+            for (var row = 0; row < Height; row++)
             {
-                case 1: // right
-                    for (var column = 0; column < Width; column++)
-                    {
-                        for (var row = Height - 1; row >= 0; row--)
-                        {
-                            Add_cell(ConstructCell(row, column, withCeckers));
-                        }
-                    }
-
-                    break;
-                case 2: // invert
-                    for (var row = Height - 1; row >= 0; row--)
-                    {
-                        for (var column = Width - 1; column >= 0; column--)
-                        {
-                            Add_cell(ConstructCell(row, column, withCeckers));
-                        }
-                    }
-
-                    break;
-                case 3: // left
-                    for (var column = Width - 1; column >= 0; column--)
-                    {
-                        for (var row = 0; row < Height; row++)
-                        {
-                            Add_cell(ConstructCell(row, column, withCeckers));
-                        }
-                    }
-
-                    break;
-                default: // 0 or default
-                    for (var row = 0; row < Height; row++)
-                    {
-                        for (var column = 0; column < Width; column++)
-                        {
-                            Add_cell(ConstructCell(row, column, withCeckers));
-                        }
-                    }
-
-                    break;
+                for (var column = 0; column < Width; column++)
+                {
+                    Add_cell(ConstructCell(row, column, withCeckers));
+                }
             }
+
+//
+//                    break;
+//            }
         }
 
         public void ShowAllowedPosition(Cell cell)
@@ -211,21 +211,30 @@ namespace Checkers
             _selectedCell = null;
         }
 
-        public void ReRenderTable()
+        public void EndTurn()
         {
-            var playerCanMove = false;
+            var currentPlayerCanMove = false;
             foreach (var cell in Cells)
             {
-                if (cell.Checker == null || cell.Checker.Get_isWhite() != CurrentWhiteTurn) continue;
-                if (cell.GetAllowedPositions().Count > 0)
-                {
-                    playerCanMove = true;
-                    break;
-                }
+                if (
+                    cell.Checker == null ||
+                    cell.Checker.Get_isWhite() != CurrentWhiteTurn ||
+                    (
+                        cell.GetBattleCells().Count <= 0 &&
+                        cell.GetAllowedPositions().Count <= 0
+                    )
+                ) continue;
+                currentPlayerCanMove = true;
+                break;
             }
 
-            if (!playerCanMove)
+            if (!currentPlayerCanMove)
                 ((MainWindow) Application.Current.MainWindow)?.EngGame(!CurrentWhiteTurn ? 1 : 0);
+            ReRenderTable();
+        }
+
+        public void ReRenderTable()
+        {
             ((MainWindow) Application.Current.MainWindow)?.RenderBattlefield(false);
         }
 
