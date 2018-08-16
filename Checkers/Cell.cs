@@ -149,8 +149,8 @@ namespace Checkers
                     if (!_desk.NeedBeat)
                     {
                         _desk.BattleCheckerPositions.Clear();
-                        _desk.EndTurn(); //todo: need good working
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
+                        _desk.EndTurn(); //todo: need good working
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
                     }
@@ -172,7 +172,7 @@ namespace Checkers
                         Checker.SetAsQuean();
                     if (Keyboard.IsKeyDown(Key.D))
                     {
-                        if (Checker.Get_isWhite())
+                        if (!Checker.Get_isShotDown() && Checker.Get_isWhite())
                             _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
                         else
                             _desk.Set_blackCount(_desk.Get_blackCount() - 1);
@@ -261,6 +261,7 @@ namespace Checkers
                 neighbors.Add(neighbordCell);
             }
 
+            // ReSharper disable once InvertIf
             if (allowLeft)
             {
                 var index = currentIndex + (_desk.CurrentWhiteTurn ? _desk.Width + 1 : -_desk.Width + 1);
