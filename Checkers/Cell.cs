@@ -76,9 +76,7 @@ namespace Checkers
                 else
                     Button.Background = !Checker.Is_Quean() ? ActiveCheckerColor : ActiveKingCheckerColor;
             else
-                Button.Background = _desk.AllowedPositions.Contains(GetCellPosition())
-                    ? AllowedPositionColor
-                    : _color.Get_color();
+                Button.Background = _desk.AllowedPositions.Contains(GetCellPosition()) ? AllowedPositionColor : _color.Get_color();
 
             if (Checker == null)
             {
@@ -91,11 +89,12 @@ namespace Checkers
                 //            Button.Content = "***" + Environment.NewLine + "***";
 
                 Button.Content = ConstructStackPanel(Checker.Get_image());
+                if (Checker.Get_isShotDown())
+                    Button.Background = Brushes.Green;
             }
 
             if (_desk.BattleCheckerPositions.Contains(_position))
                 Button.Background = Brushes.Red;
-
             return Button;
         }
 
@@ -140,24 +139,23 @@ namespace Checkers
                                     _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
                                 else
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
-                                _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker = null;
+                                _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.ShotDown();
                             }
 
                         Click(sender, e);
                         _desk.CheckIfNeedBeate(this);
-                        _desk.ReRenderTable();
                     }
 
                     if (!_desk.NeedBeat)
                     {
                         _desk.BattleCheckerPositions.Clear();
+                        _desk.EndTurn(); //todo: need good working
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
-                        _desk.EndTurn();
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
                     }
-                    else
-                        _desk.ReRenderTable();
+
+                    _desk.ReRenderTable();
 
                     return;
                 }
@@ -364,7 +362,7 @@ namespace Checkers
         {
             var battleCells = new List<Cell>();
             var currentChecker = Checker;
-            if (currentChecker == null || currentChecker.Get_isWhite() != _desk.CurrentWhiteTurn) return battleCells;
+            if (currentChecker == null || currentChecker.Get_isShotDown() || currentChecker.Get_isWhite() != _desk.CurrentWhiteTurn) return battleCells;
             var diagonals = GetCellDiagonals();
             foreach (var diagonal in diagonals)
             {
@@ -386,7 +384,7 @@ namespace Checkers
 
                     if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
                         break;
-                    if (viewedChecker != null)
+                    if (viewedChecker != null && !viewedChecker.Get_isShotDown())
                         ++enemyCheckersCount;
                 }
             }

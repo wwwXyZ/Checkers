@@ -83,8 +83,8 @@ namespace Checkers
         {
             MinWidth = 8;
             MinHeight = 8;
-            DefaultWidth = 6;
-            DefaultHeight = 6;
+            DefaultWidth = 8;
+            DefaultHeight = 8;
         }
 
         public Desk(int width, int height, bool whiteOnTop, int rotation, bool currentWhiteTurn)
@@ -216,6 +216,13 @@ namespace Checkers
             var currentPlayerCanMove = false;
             foreach (var cell in Cells)
             {
+                if (cell.Checker != null && cell.Checker.Get_isShotDown())
+                {
+                    cell.Checker = null;
+                    var position = cell.GetCellPosition();
+                    Cells[position.Get_row() * Width + position.Get_column()].Checker = null;
+                }
+
                 if (
                     cell.Checker == null ||
                     cell.Checker.Get_isWhite() != CurrentWhiteTurn ||
@@ -225,12 +232,11 @@ namespace Checkers
                     )
                 ) continue;
                 currentPlayerCanMove = true;
-                break;
+//                break;
             }
 
             if (!currentPlayerCanMove)
                 ((MainWindow) Application.Current.MainWindow)?.EngGame(!CurrentWhiteTurn ? 1 : 0);
-            ReRenderTable();
         }
 
         public void ReRenderTable()
@@ -249,7 +255,7 @@ namespace Checkers
             foreach (var cell in Cells)
             {
                 var battleCells = cell.GetBattleCells();
-                if (battleCells.Count == 0) continue;
+                if (battleCells.Count <= 0) continue;
                 NeedBeat = true;
             }
         }

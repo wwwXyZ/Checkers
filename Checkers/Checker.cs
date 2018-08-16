@@ -6,6 +6,7 @@ namespace Checkers
     public class Checker
     {
         private bool _isQuean;
+        private bool _isShotDown;
         private readonly bool _isWhite;
 
         public Checker(bool isWhite, bool isQuean)
@@ -14,12 +15,22 @@ namespace Checkers
             _isQuean = isQuean;
         }
 
+        public bool Get_isShotDown()
+        {
+            return _isShotDown;
+        }
+
+        public void ShotDown()
+        {
+            _isShotDown = true;
+        }
+
         public SolidColorBrush Get_color()
         {
             return _isWhite ? Brushes.DeepPink : Brushes.BlueViolet;
         }
 
-        public String Get_image()
+        public string Get_image()
         {
             return _isWhite ? "images/putin.png" : "images/trump.png";
         }
