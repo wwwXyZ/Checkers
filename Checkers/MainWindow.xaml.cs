@@ -76,25 +76,40 @@ namespace Checkers
             LbWhiteCount.Content = whiteCount;
             LbBlackCount.Content = blackCount;
             if (whiteCount <= 0)
-                EngGame(0);
+                EngGame(-2);
             if (blackCount <= 0)
-                EngGame(1);
+                EngGame(2);
             LbCurrentTurn.Content = Desk.CurrentWhiteTurn ? "White" : "Black";
         }
 
-        public void EngGame(int condition) // 0 - BLACK WIN; 1 - WHITE WIN; -1 - DRAW
+        /*
+         *  -2 - BLACK WINS;
+         *  -1 - BLACK DRAW;
+         *   0 - FULL DRAW;
+         *   1 - WHITE DRAW;
+         *   2 - WHITE WINS
+         */
+        public void EngGame(int condition)
         {
-            string content;
+            var content = "";
             switch (condition)
             {
-                case 0:
+                case -2:
                     content = "BLACK WINS!";
                     break;
+                case -1:
+                    content = "BLACK DRAW";
+                    break;
+                case 0:
+                    content = "FULL DRAW";
+                    break;
                 case 1:
+                    content = "WHITE DRAW";
+                    break;
+                case 2:
                     content = "WHITE WINS!";
                     break;
                 default:
-                    content = "DRAW :(";
                     break;
             }
 

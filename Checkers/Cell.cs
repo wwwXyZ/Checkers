@@ -25,6 +25,7 @@ namespace Checkers
         public SolidColorBrush AllowedPositionColor;
         public Button Button;
         private readonly Desk _desk;
+        private string rawCell;
 
         public Cell(CellPosition position, CellColor color, Checker checker, Desk desk)
         {
@@ -53,7 +54,7 @@ namespace Checkers
             var stackPnl = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0)
+                Margin = new Thickness(5)
             };
             stackPnl.Children.Add(new Image {Source = new BitmapImage(new Uri(imageSource, UriKind.RelativeOrAbsolute))});
             return stackPnl;
@@ -65,8 +66,7 @@ namespace Checkers
             {
                 Button = new Button();
                 Button.Click += Click;
-                Button.Style =
-                    (Style) ((MainWindow) Application.Current.MainWindow)?.FindResource("ButtonWithoutHoverEffect");
+                Button.Style = (Style) ((MainWindow) Application.Current.MainWindow)?.FindResource("ButtonWithoutHoverEffect");
             }
 
             Button.Name = "button_" + _position.Get_column() + "_" + _position.Get_row();
@@ -416,6 +416,17 @@ namespace Checkers
             }
 
             return positions;
+        }
+
+        /*
+         * First number = CellColor (Black 0; White 1)
+         * Second number = Cecker (null 0; Black 1; Black Quean 2; White 3; White Quean 4)
+         */
+        public string ReturnCellAsRawText()
+        {
+            var number = _color.Get_isWhite() ? "1" : "0";
+            number += Checker == null ? "0" : (Checker.Get_isWhite() ? (Checker.Is_Quean() ? "4" : "3") : (Checker.Is_Quean() ? "2" : "1"));
+            return number;
         }
     }
 }

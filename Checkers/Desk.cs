@@ -24,6 +24,8 @@ namespace Checkers
         public int Rotation { get; set; } // 0 - 0 degree; 1 - 90 degree; 2 - 180 degree; 3 - 270 degree
         private int _blackCount;
         private int _whiteCount;
+        private int _blackQueansCount;
+        private int _whiteQueansCount;
         private bool _allowCheats = true;
         public bool NeedBeat { get; set; }
 
@@ -33,6 +35,7 @@ namespace Checkers
         public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> AllowedPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> BattleCheckerPositions = new List<Cell.CellPosition>();
+        public List<string> GameCellsDeskHistory = new List<string>();
 
         public void Toggle_allowCheats()
         {
@@ -107,6 +110,55 @@ namespace Checkers
             OrganizeDefaultPositions();
         }
 
+        /*
+         * Width;Heigth;WiteOnTop;CurrentTurn;cell,cell,cell...
+         * WiteOnTop(No 0; Yes 1;)
+         * CurrentTurn(Black 0; White 1;)
+         */
+        public Desk(string rawDesk)
+        {
+            var deskParams = rawDesk.Split(';');
+            if (deskParams.Length < 4)
+                throw new Exception("Invalid desk params!");
+            Width = int.Parse(deskParams[0]);
+            Height = int.Parse(deskParams[1]);
+            WhiteOnTop = deskParams[2] == "1";
+            CurrentWhiteTurn = deskParams[3] == "1";
+            var rawCells = deskParams[4].Split(',');
+            if (rawCells.Length < Width * Height)
+                throw new Exception("Incorrect cells count!");
+
+            for (var column = 0; column < Width; column++)
+            {
+                for (var row = 0; row < Height; row++)
+                {
+                    var rawCell = rawCells[row * Width + column];
+                    Checker checker;
+                    var rawChrcker = int.Parse(rawCell.Substring(1, 1));
+                    switch (rawChrcker)
+                    {
+                        case 1:
+                            checker = new Checker(false, false);
+                            break;
+                        case 2:
+                            checker = new Checker(false, true);
+                            break;
+                        case 3:
+                            checker = new Checker(true, false);
+                            break;
+                        case 4:
+                            checker = new Checker(true, true);
+                            break;
+                        default:
+                            checker = null;
+                            break;
+                    }
+
+                    Cells.Add(new Cell(new Cell.CellPosition(column, row), new Cell.CellColor(rawCell[0] == '1'), checker, this));
+                }
+            }
+        }
+
         public void OrganizeDefaultPositions()
         {
             TopDefaultPositions.Clear();
@@ -140,6 +192,7 @@ namespace Checkers
             Set_blackCount(0);
             Set_whiteCount(0);
             Cells.Clear();
+            GameCellsDeskHistory.Clear();
         }
 
         private Cell ConstructCell(int row, int column, bool withCheckers)
@@ -235,8 +288,142 @@ namespace Checkers
 //                break;
             }
 
-            if (!currentPlayerCanMove)
-                ((MainWindow) Application.Current.MainWindow)?.EngGame(!CurrentWhiteTurn ? 1 : 0);
+            SaveInDeskHistory();
+            var isDraw = false;
+            var drawType = 0;
+            /*
+             * Draw condition:
+             * one desk position repeet 3 times - CheckTripplePosition
+             * if at the end of the game three queans (or more) against one quean enemy, his 15th move (counting from the moment of equality of forces) will not take the opponent`s checker - Check15ThQueansBattle
+             * if in a position in which both rivals have a quean, the balance of forces has not changed (i.e., there has not been a take, and no single checker has become a quean) over:
+             * in 2 and 3-figure endings - 5 moves,
+             * in 4 and 5-figure endings - 30 moves,
+             * in 6 and 7-figure endings - 60 moves. - CheckPowerResistance
+             */
+            if (CheckTripplePosition() || Check15ThQueansBattle() || CheckPowerResistance())
+                isDraw = true;
+
+
+            if (isDraw) //check draw type
+                drawType = ShowDrawType();
+            if (isDraw || !currentPlayerCanMove)
+                ((MainWindow) Application.Current.MainWindow)?.EngGame(isDraw ? drawType : (!CurrentWhiteTurn ? 1 : 0));
+        }
+
+        /*
+         * Count available checkers two players and chose winner
+         * simple checke = +1
+         * quean = +3
+         */
+        private int ShowDrawType()
+        {
+            var blackPoints = 0;
+            var whitePoints = 0;
+            foreach (var cell in Cells)
+            {
+                if (cell.Checker == null) continue;
+                if (cell.Checker.Get_isWhite())
+                    whitePoints += cell.Checker.Is_Quean() ? 3 : 1;
+                else
+                    blackPoints += cell.Checker.Is_Quean() ? 3 : 1;
+            }
+
+            return blackPoints == whitePoints ? 0 : (blackPoints < whitePoints ? 1 : -1);
+        }
+
+        private bool CheckTripplePosition()
+        {
+            if (GameCellsDeskHistory.Count <= 0) return false;
+            foreach (var deskStatement in GameCellsDeskHistory)
+            {
+                var gameCellsDeskHistory2 = new List<string>(GameCellsDeskHistory);
+                gameCellsDeskHistory2.Remove(gameCellsDeskHistory2.FirstOrDefault(value => value == deskStatement));
+                foreach (var deskStatement2 in gameCellsDeskHistory2)
+                {
+                    if (deskStatement != deskStatement2) continue;
+                    var gameCellsDeskHistory3 = new List<string>(gameCellsDeskHistory2);
+                    gameCellsDeskHistory3.Remove(gameCellsDeskHistory3.FirstOrDefault(value => value == deskStatement));
+                    foreach (var deskStatement3 in gameCellsDeskHistory3)
+                        if (deskStatement2 == deskStatement3)
+                            return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool Check15ThQueansBattle()
+        {
+            var deskStatementsCount = GameCellsDeskHistory.Count;
+            if (deskStatementsCount < 15) return false;
+            var fifteenthBackDesk = new Desk(GameCellsDeskHistory[deskStatementsCount - 15]);
+            UpdateSimpleCheckersAndQueansCount();
+            fifteenthBackDesk.UpdateSimpleCheckersAndQueansCount();
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (
+                fifteenthBackDesk._whiteCount != _whiteQueansCount ||
+                fifteenthBackDesk._blackCount != _blackQueansCount ||
+                fifteenthBackDesk._whiteCount != _whiteCount ||
+                fifteenthBackDesk._blackCount != _blackCount ||
+                fifteenthBackDesk._whiteQueansCount <= 0 ||
+                fifteenthBackDesk._blackQueansCount <= 0 ||
+                _whiteQueansCount <= 0 ||
+                _blackQueansCount <= 0 ||
+                _whiteQueansCount != fifteenthBackDesk._whiteQueansCount ||
+                _blackQueansCount != fifteenthBackDesk._blackQueansCount
+            ) return false;
+
+
+            return true;
+        }
+
+        private bool CheckPowerResistance()
+        {
+            UpdateSimpleCheckersAndQueansCount();
+            var deskStatementsCount = GameCellsDeskHistory.Count;
+            if (deskStatementsCount < 5) return false;
+            var fivethBackDesk = new Desk(GameCellsDeskHistory[deskStatementsCount - 5]);
+            fivethBackDesk.UpdateSimpleCheckersAndQueansCount();
+            if ((fivethBackDesk._whiteCount <= 3 || fivethBackDesk._blackCount <= 3) && CheckPowerContition(fivethBackDesk)) return true;
+            if (deskStatementsCount < 30) return false;
+            var thirtiethBackDesk = new Desk(GameCellsDeskHistory[deskStatementsCount - 30]);
+            thirtiethBackDesk.UpdateSimpleCheckersAndQueansCount();
+            if ((thirtiethBackDesk._whiteCount <= 5 || thirtiethBackDesk._blackCount <= 5) && CheckPowerContition(thirtiethBackDesk)) return true;
+            if (deskStatementsCount < 60) return false;
+            var sixtiethBackDesk = new Desk(GameCellsDeskHistory[deskStatementsCount - 60]);
+            sixtiethBackDesk.UpdateSimpleCheckersAndQueansCount();
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if ((sixtiethBackDesk._whiteCount <= 7 || sixtiethBackDesk._blackCount <= 7) && CheckPowerContition(sixtiethBackDesk)) return true;
+            return false;
+        }
+
+        private bool CheckPowerContition(Desk desk)
+        {
+            return desk._whiteCount == _whiteCount && desk._blackCount == _blackCount && desk._whiteQueansCount > 0 && desk._blackQueansCount > 0 && _whiteQueansCount > 0 && _blackQueansCount > 0 && _whiteQueansCount == desk._whiteQueansCount && _blackQueansCount == desk._blackQueansCount;
+        }
+
+        private void UpdateSimpleCheckersAndQueansCount()
+        {
+            _whiteCount = 0;
+            _blackCount = 0;
+            _whiteQueansCount = 0;
+            _blackQueansCount = 0;
+            foreach (var cell in Cells)
+            {
+                if (cell.Checker == null) continue;
+                if (cell.Checker.Get_isWhite())
+                {
+                    if (cell.Checker.Is_Quean())
+                        ++_whiteQueansCount;
+                    ++_whiteCount;
+                }
+                else
+                {
+                    if (cell.Checker.Is_Quean())
+                        ++_blackQueansCount;
+                    ++_blackCount;
+                }
+            }
         }
 
         public void ReRenderTable()
@@ -266,6 +453,27 @@ namespace Checkers
 
             var battleCells = cell.GetBattleCells();
             NeedBeat = battleCells.Count > 0;
+        }
+
+        /*
+         * Width;Heigth;WiteOnTop;CurrentTurn;cell,cell,cell...
+         * WiteOnTop(No 0; Yes 1;)
+         * CurrentTurn(Black 0; White 1;)
+         */
+        public void SaveInDeskHistory()
+        {
+            var deskStatement = "";
+            deskStatement += Width + ";";
+            deskStatement += Height + ";";
+            deskStatement += (WhiteOnTop ? "1" : "0") + ";";
+            deskStatement += (CurrentWhiteTurn ? "1" : "0") + ";";
+            foreach (var cell in Cells)
+            {
+                deskStatement += cell.ReturnCellAsRawText() + ",";
+            }
+
+            deskStatement = deskStatement.Substring(0, deskStatement.Length - 1);
+            GameCellsDeskHistory.Add(deskStatement);
         }
     }
 }

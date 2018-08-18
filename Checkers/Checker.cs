@@ -32,7 +32,7 @@ namespace Checkers
 
         public string Get_image()
         {
-            return _isWhite ? "images/putin.png" : "images/trump.png";
+            return Is_Quean() ? (_isWhite ? "images/whiteCrown.png" : "images/blackCrown.png") : (_isWhite ? "images/white.png" : "images/black.png");
         }
 
         public bool Is_Quean()
