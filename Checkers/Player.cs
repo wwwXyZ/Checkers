@@ -7,7 +7,6 @@ namespace Checkers
     {
         private readonly bool _isHuman;
         private readonly bool _isWhite;
-        private bool _botSimulator;
 
         public Player(string rawPlayer)
         {
@@ -46,11 +45,6 @@ namespace Checkers
             return _isHuman;
         }
 
-        public bool Get_botSimulator()
-        {
-            return _botSimulator;
-        }
-
         public bool Get_isWhite()
         {
             return _isWhite;
@@ -65,11 +59,6 @@ namespace Checkers
         public string ReturnPlayerAsRawText()
         {
             return (_isHuman ? (_isWhite ? 1 : 0) : (_isWhite ? 2 : 3)).ToString();
-        }
-
-        public void SetAsBot()
-        {
-            _botSimulator = true;
         }
 
     }

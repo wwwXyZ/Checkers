@@ -28,6 +28,7 @@ namespace Checkers
         private int _whiteCount;
         private int _blackQueansCount;
         private int _whiteQueansCount;
+        private bool _isBotSimulation;
         private bool _allowCheats = true;
         public bool NeedBeat { get; set; }
         public bool CurrentWhiteTurn;
@@ -73,6 +74,15 @@ namespace Checkers
         public void Set_whiteCount(int value)
         {
             _whiteCount = value;
+        }
+
+        public bool Get_isBotSimulation()
+        {
+            return _isBotSimulation;
+        }
+        public void StartBotSimulation()
+        {
+            _isBotSimulation = true;
         }
 
         public Cell Get_selectedCell()
@@ -342,7 +352,7 @@ namespace Checkers
         {
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
-                if (CurrentPlayerIsHuman()) return;
+                if (CurrentPlayerIsHuman() || _isBotSimulation) return;
                 var currentPlayerIsWhite = GetCurrentPlayer().Get_isWhite();
                 if (_firstPlayerBot != null && _firstPlayerBot.Get_isWhiteSide() == currentPlayerIsWhite)
                 {
@@ -357,14 +367,7 @@ namespace Checkers
             }));
         }
 
-        public void SetCurrentPlayerAsBot()
-        {
-            var currentPlayer = GetCurrentPlayer();
-            if (FirstPlayer.Get_isWhite() == currentPlayer.Get_isWhite())
-                FirstPlayer.SetAsBot();
-            else
-                SecondPlayer.SetAsBot();
-        }
+
 
         /*
          * Count available checkers two players and chose winner

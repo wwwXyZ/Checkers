@@ -81,7 +81,7 @@ namespace Checkers.AI
         {
             var score = 0;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());
-            desk.SetCurrentPlayerAsBot();
+            desk.StartBotSimulation();
             desk.CheckIfNeedBeate();
             if (!desk.NeedBeat) return score;
             var checkerCell = desk.Cells[loadedCheckerCellPosition.Get_row() * desk.Width + loadedCheckerCellPosition.Get_column()];
@@ -103,20 +103,32 @@ namespace Checkers.AI
         {
             var score = currentScore;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());
-            desk.SetCurrentPlayerAsBot();
+            desk.StartBotSimulation();
+            var side = desk.CurrentWhiteTurn;
             var checkerCell = desk.Cells[loadedCheckerCellPosition.Get_row() * desk.Width + loadedCheckerCellPosition.Get_column()];
             var nextCell = desk.Cells[loadedNextCellPosition.Get_row() * desk.Width + loadedNextCellPosition.Get_column()];
             checkerCell.Click(false);
             nextCell.Click(false);
-            score += GetCeckerScore(desk.Get_lastShotDownChecker());
+            score += GetCeckerScore(desk.Get_lastShotDownChecker(), side);
+            while (side == desk.CurrentWhiteTurn)
+            {
+                var cellPosition = SelectBestBeatCombination(desk);
+                desk.Cells[cellPosition.Get_row() * desk.Width + cellPosition.Get_column()].Click(false);
+                score += GetCeckerScore(desk.Get_lastShotDownChecker(), side);
+            }
+
             // beat if need and compute score
             desk.CheckIfNeedBeate();
             if (!desk.NeedBeat)
                 return score;
 
-            var cellPosition = SelectBestBeatCombination(_desk);
-            _desk.Cells[cellPosition.Get_row() * _desk.Width + cellPosition.Get_column()].Click(false);
-            score += GetCeckerScore(desk.Get_lastShotDownChecker());
+//            while (desk.NeedBeat && side == desk.CurrentWhiteTurn)
+//            {
+//                var cellPosition = SelectBestBeatCombination(_desk);
+//                desk.Cells[cellPosition.Get_row() * _desk.Width + cellPosition.Get_column()].Click(false);
+//                score += GetCeckerScore(desk.Get_lastShotDownChecker());
+//            }
+
             return score;
         }
 
@@ -126,9 +138,9 @@ namespace Checkers.AI
          * Lost quean: -15
          * Lost checker: -6
          */
-        private int GetCeckerScore(Checker checker)
+        private int GetCeckerScore(Checker checker, bool isWhiteSide)
         {
-            return checker == null ? 0 : (checker.Get_isWhite() != _isWhiteSide ? (checker.Is_Quean() ? 14 : 4) : (checker.Is_Quean() ? -15 : -6));
+            return checker == null ? 0 : (checker.Get_isWhite() != isWhiteSide ? (checker.Is_Quean() ? 14 : 4) : (checker.Is_Quean() ? -15 : -6));
         }
     }
 }

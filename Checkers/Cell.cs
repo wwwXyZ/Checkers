@@ -109,6 +109,7 @@ namespace Checkers
         {
             if (Checker == null)
             {
+                _desk.Set_ShotDownCecker(null);
                 if (_desk.AllowedPositions.Contains(_position))
                 {
                     // move to new position
@@ -147,7 +148,8 @@ namespace Checkers
                                 else
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                                 _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.ShotDown();
-                                _desk.Set_ShotDownCecker(Checker);
+                                _desk.Set_ShotDownCecker(deskCell.Checker);
+                                break;
                             }
 
                         Click(false);
@@ -180,7 +182,7 @@ namespace Checkers
 
             if (Checker != null)
             {
-                if (_desk.Get_allowCheats() && !_desk.GetCurrentPlayer().Get_botSimulator() &&_desk.CurrentPlayerIsHuman() && Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt)) //Cheats
+                if (_desk.Get_allowCheats() && !_desk.Get_isBotSimulation() &&_desk.CurrentPlayerIsHuman() && Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt)) //Cheats
                 {
                     if (Keyboard.IsKeyDown(Key.Q))
                         Checker.SetAsQuean();
