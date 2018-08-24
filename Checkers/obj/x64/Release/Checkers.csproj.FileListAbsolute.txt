@@ -17,3 +17,4 @@ C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\
 C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Release\Checkers.csproj.GenerateResource.Cache
 C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Release\Checkers.exe
 C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Release\Checkers.pdb
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Release\Checkers.csprojResolveAssemblyReference.cache

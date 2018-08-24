@@ -886,6 +886,9 @@
         "runtime": {
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
+      },
+      "Checkers/1.0.0": {
+        "type": "project"
       }
     }
   },
@@ -3695,10 +3698,16 @@
         "system.xml.xdocument.4.3.0.nupkg.sha512",
         "system.xml.xdocument.nuspec"
       ]
+    },
+    "Checkers/1.0.0": {
+      "type": "project",
+      "path": "../Checkers/Checkers.csproj",
+      "msbuildProject": "../Checkers/Checkers.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v1.4": [
+      "Checkers >= 1.0.0",
       "NETStandard.Library >= 1.6.1"
     ]
   },
@@ -3708,17 +3717,21 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ClassLibrary1\\ClassLibrary1.csproj",
-      "projectName": "ClassLibrary1",
-      "projectPath": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ClassLibrary1\\ClassLibrary1.csproj",
-      "outputPath": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ClassLibrary1\\obj\\",
+      "projectUniqueName": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ML\\AI.csproj",
+      "projectName": "AI",
+      "projectPath": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ML\\AI.csproj",
+      "outputPath": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\ML\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netstandard1.4"
       ],
       "frameworks": {
         "netstandard1.4": {
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\Checkers\\Checkers.csproj": {
+              "projectPath": "C:\\Users\\wwwXyZ\\documents\\visual studio 2017\\Projects\\Checkers\\Checkers\\Checkers.csproj"
+            }
+          }
         }
       }
     },

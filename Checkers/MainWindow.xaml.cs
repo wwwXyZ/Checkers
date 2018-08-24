@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,7 +26,7 @@ namespace Checkers
         {
             InitializeComponent();
             // Generate checkers grid
-            Desk = new Desk();
+            Desk = new Desk(8, 8, 0, true, true, false);
             GenerateGrid();
         }
 
@@ -43,6 +44,7 @@ namespace Checkers
             Desk.Clear_cells();
             Desk.Generate(true);
             RenderBattlefield(true);
+            UpdateRotation();
         }
 
         public void Render_checkers_position(bool viaClear)
@@ -50,7 +52,7 @@ namespace Checkers
             if (viaClear)
             {
                 Desk.AllowedPositions.Clear();
-                Desk.BattleCheckerPositions.Clear();
+                Desk.BattleCheckersPositions.Clear();
                 LbWin.Visibility = Visibility.Hidden;
                 Ungrd.Children.Clear();
                 foreach (var cell in Desk.Cells)

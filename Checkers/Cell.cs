@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -93,12 +94,18 @@ namespace Checkers
                     Button.Background = Brushes.Green;
             }
 
-            if (_desk.BattleCheckerPositions.Contains(_position))
+            if (_desk.BattleCheckersPositions.Contains(_position))
                 Button.Background = Brushes.Red;
             return Button;
         }
 
         private void Click(object sender, RoutedEventArgs e)
+        {
+            if (_desk.CurrentPlayerIsHuman())
+                Click(true);
+        }
+
+        public void Click(bool allowRender)
         {
             if (Checker == null)
             {
@@ -140,22 +147,29 @@ namespace Checkers
                                 else
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                                 _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.ShotDown();
+                                _desk.Set_ShotDownCecker(Checker);
                             }
 
-                        Click(sender, e);
+                        Click(false);
                         _desk.CheckIfNeedBeate(this);
                     }
 
                     if (!_desk.NeedBeat)
                     {
-                        _desk.BattleCheckerPositions.Clear();
+                        _desk.BattleCheckersPositions.Clear();
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
                         _desk.EndTurn(); //todo: need good working
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
+                        if (allowRender)
+                            _desk.ReRenderTable(Desk.BotStepTimeout);
+                        _desk.BotTurn();
+                        if (allowRender)
+                            _desk.ReRenderTable(Desk.BotStepTimeout);
                     }
 
-                    _desk.ReRenderTable();
+                    if (allowRender)
+                        _desk.ReRenderTable();
 
                     return;
                 }
@@ -166,7 +180,7 @@ namespace Checkers
 
             if (Checker != null)
             {
-                if (_desk.Get_allowCheats() && Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt)) //Cheats
+                if (_desk.Get_allowCheats() && !_desk.GetCurrentPlayer().Get_botSimulator() &&_desk.CurrentPlayerIsHuman() && Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt)) //Cheats
                 {
                     if (Keyboard.IsKeyDown(Key.Q))
                         Checker.SetAsQuean();
@@ -178,11 +192,11 @@ namespace Checkers
                             _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                         Checker = null;
                         _desk.AllowedPositions.Clear();
-                        _desk.BattleCheckerPositions.Clear();
+                        _desk.BattleCheckersPositions.Clear();
                         if (_desk.Get_selectedCell() != null && _desk.Get_selectedCell().Checker != null)
                         {
                             _desk.Get_selectedCell().GetBattleCells();
-                            if (_desk.BattleCheckerPositions.Count <= 0)
+                            if (_desk.BattleCheckersPositions.Count <= 0)
                                 _desk.Get_selectedCell().GetAllowedPositions();
                             else
                             {
@@ -192,7 +206,8 @@ namespace Checkers
                             }
                         }
 
-                        _desk.ReRenderTable();
+                        if (allowRender)
+                            _desk.ReRenderTable();
                         return;
                     }
                 }
@@ -212,10 +227,14 @@ namespace Checkers
                     {
                         _desk.ShowAllowedPosition(this);
                     }
+                    _desk.BotTurn();
+                    if (allowRender)
+                        _desk.ReRenderTable(Desk.BotStepTimeout);
                 }
             }
 
-            _desk.ReRenderTable();
+            if (allowRender)
+                _desk.ReRenderTable();
         }
 
         public void SetDefaultChecker(Desk desk)
@@ -228,7 +247,7 @@ namespace Checkers
 
             if (match != null)
             {
-                Checker = new Checker(desk.WhiteOnTop, false);
+                Checker = new Checker(true, false);
             }
             else
             {
@@ -237,7 +256,7 @@ namespace Checkers
                 );
 
                 if (match != null)
-                    Checker = new Checker(!desk.WhiteOnTop, false);
+                    Checker = new Checker(false, false);
             }
         }
 
@@ -375,8 +394,10 @@ namespace Checkers
                     {
                         if (enemyCheckersCount == 1)
                         {
-                            battleCells.Add(deskCell);
-                            _desk.BattleCheckerPositions.Add(_position);
+                            if (!battleCells.Contains(deskCell))
+                                battleCells.Add(deskCell);
+                            if (!_desk.BattleCheckersPositions.Contains(_position))
+                                _desk.BattleCheckersPositions.Add(_position);
                         }
 
                         if (!currentChecker.Is_Quean())
