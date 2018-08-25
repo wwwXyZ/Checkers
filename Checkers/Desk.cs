@@ -36,7 +36,7 @@ namespace Checkers
         public Player FirstPlayer { get; }
         public Player SecondPlayer { get; }
         private Cell _selectedCell;
-        private Checker _lastShotDownChecker;
+        private Cell _lastShotDownCheckerCell;
         public List<Cell> Cells = new List<Cell>();
         public List<Cell.CellPosition> TopDefaultPositions = new List<Cell.CellPosition>();
         public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
@@ -90,17 +90,17 @@ namespace Checkers
             return _selectedCell;
         }
 
-        public Checker Get_lastShotDownChecker()
+        public Cell Get_lastShotDownCheckerCell()
         {
-            return _lastShotDownChecker;
+            return _lastShotDownCheckerCell;
         }
 
-        public void Set_ShotDownCecker(Checker checker)
+        public void Set_ShotDownCeckerCell(Cell checkerCell)
         {
-            _lastShotDownChecker = checker;
+            _lastShotDownCheckerCell = new Cell(checkerCell.GetCellPosition(), checkerCell.ReturnCellAsRawText(), this);
         }
 
-        public static int GetMinHeight()
+    public static int GetMinHeight()
         {
             return MinHeight;
         }
@@ -168,28 +168,7 @@ namespace Checkers
                 for (var column = 0; column < Width; column++)
                 {
                     var rawCell = rawCells[row * Width + column];
-                    Checker checker;
-                    var rawChrcker = int.Parse(rawCell.Substring(1, 1));
-                    switch (rawChrcker)
-                    {
-                        case 1:
-                            checker = new Checker(false, false);
-                            break;
-                        case 2:
-                            checker = new Checker(false, true);
-                            break;
-                        case 3:
-                            checker = new Checker(true, false);
-                            break;
-                        case 4:
-                            checker = new Checker(true, true);
-                            break;
-                        default:
-                            checker = null;
-                            break;
-                    }
-
-                    Cells.Add(new Cell(new Cell.CellPosition(column, row), new Cell.CellColor(rawCell[0] == '1'), checker, this));
+                    Cells.Add(new Cell(new Cell.CellPosition(column, row), rawCell, this));
                 }
             }
 
