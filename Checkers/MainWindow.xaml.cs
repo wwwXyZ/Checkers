@@ -14,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Checkers.AI;
+using Checkers.Utils;
 
 namespace Checkers
 {
@@ -25,11 +27,14 @@ namespace Checkers
         {
             InitializeComponent();
             // Generate checkers grid
-            Desk = new Desk(8, 8, 0, true, false, false);
+            Desk = new Desk(8, 8, 0, false, false, false);
             GenerateGrid();
+#if DEBUG
+            ConsoleManager.Show();
+#endif
         }
 
-        private void btn_new_game_Click(object sender, RoutedEventArgs e)
+        private void BtnNewGameClick(object sender, RoutedEventArgs e)
         {
             GenerateGrid();
         }
@@ -64,7 +69,7 @@ namespace Checkers
                     CopyControl(Desk.Cells[i].RenderDeskChellAsButton(), Ungrd.Children[i] as Button);
         }
 
-        private void UpdateRotation()
+        public void UpdateRotation()
         {
             var angle = 90 * Desk.Rotation;
             var rotateTransform = new RotateTransform {Angle = angle};
@@ -118,6 +123,7 @@ namespace Checkers
 
             LbWin.Content = content;
             LbWin.Visibility = Visibility.Visible;
+            BtnNewGameClick(null, null);
         }
 
         protected virtual void CopyControl(Control sourceControl, Control targetControl)
@@ -149,9 +155,14 @@ namespace Checkers
             }
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void AllowCheats_Click(object sender, RoutedEventArgs e)
         {
             Desk.Toggle_allowCheats();
+        }
+
+        private void AutoRotate_Click(object sender, RoutedEventArgs e)
+        {
+            Desk.Toggle_autoRotate();
         }
 
         private void LeftRotateBtn_Click(object sender, RoutedEventArgs e)

@@ -59,5 +59,14 @@ namespace Checkers.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start AI.
+        /// </summary>
+        internal static string ArtificialIntelligence_MoveToNextPosition_Start_AI {
+            get {
+                return ResourceManager.GetString("ArtificialIntelligence_MoveToNextPosition_Start_AI", resourceCulture);
+            }
+        }
     }
 }

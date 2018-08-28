@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Windows.Threading;
 
 namespace Checkers.AI
 {
@@ -19,11 +20,20 @@ namespace Checkers.AI
 
         public void GenerateMovePositions()
         {
+            Console.WriteLine("Vanga: GenerateMovePositions");
             var cells = _desk.Cells;
             _desk.CheckIfNeedBeate();
             if (_desk.NeedBeat)
             {
-                var cellPosition = SelectBestBeatCombination(_desk);
+                Cell.CellPosition cellPosition = null;
+//                var thread = new Thread(() =>
+//                {
+                cellPosition = SelectBestBeatCombination(_desk);
+//                }, 2000000000);
+//                thread.Start();
+//                thread.Join();
+                if (cellPosition == null) return;
+                Console.WriteLine($@"Vanga: Click = r:{cellPosition.Get_row()} c:{cellPosition.Get_column()}");
                 _desk.GetCell(cellPosition).Click(true);
                 _vangaMadeTurn = true;
             }
@@ -42,6 +52,7 @@ namespace Checkers.AI
             int currentScore;
             if (selectedCell != null)
             {
+                Console.WriteLine("Vanga nselectedCell != null");
                 var selectedCellPosition = selectedCell.GetCellPosition();
                 var allowedPositions = desk.AllowedPositions;
                 currentScore = 0;
@@ -62,6 +73,7 @@ namespace Checkers.AI
                     }
                 }
 
+                Console.WriteLine($@"Vanga nextCellPosition = {(currentCellPosition == null ? "null" : $"r:{currentCellPosition.Get_row()} c:{currentCellPosition.Get_column()}")}");
                 return currentCellPosition;
             }
 
@@ -153,6 +165,7 @@ namespace Checkers.AI
             var anotherSideDesk = new Desk(desk.ReturnDeskAsRawText());
             anotherSideDesk.StartBotSimulation();
             anotherSideDesk.CheckIfNeedBeate();
+            if (!anotherSideDesk.NeedBeat) return score;
             while (side != anotherSideDesk.CurrentWhiteTurn)
             {
                 var cellPosition = SelectBestBeatCombination(anotherSideDesk);

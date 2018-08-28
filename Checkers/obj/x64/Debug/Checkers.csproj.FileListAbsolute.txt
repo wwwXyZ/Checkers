@@ -17,4 +17,6 @@ C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\bin\x64\
 C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.dll
 C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.pdb
 C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\HtmlAgilityPack.xml
-C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.csprojResolveAssemblyReference.cache
+C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Checkers.exe.CodeAnalysisLog.xml
+C:\Users\wwwXyZ\Documents\Visual Studio 2017\Projects\Checkers\Checkers\bin\x64\Debug\Checkers.exe.lastcodeanalysissucceeded
+C:\Users\wwwXyZ\documents\visual studio 2017\Projects\Checkers\Checkers\obj\x64\Debug\Checkers.csprojResolveAssemblyReference.cache

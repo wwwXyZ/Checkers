@@ -34,9 +34,10 @@
     <Grid>
         <DockPanel>
             <Menu x:Name="menu" DockPanel.Dock="Top">
-                <MenuItem x:Name="BtnNewGame" Header="_New game" Click="btn_new_game_Click" />
+                <MenuItem x:Name="BtnNewGame" Header="_New game" Click="BtnNewGameClick" />
                 <MenuItem Header="_Options">
-                    <MenuItem Header="_Cheats" IsCheckable="True" IsChecked="True" Click="MenuItem_Click" />
+                    <MenuItem Header="Auto _rotate" IsCheckable="True" IsChecked="False" Click="AutoRotate_Click" />
+                    <MenuItem Header="_Cheats" IsCheckable="True" IsChecked="True" Click="AllowCheats_Click" />
                     <!-- <MenuItem Header="Start _ML" /> -->
                     <MenuItem Header="_Exit" />
                 </MenuItem>

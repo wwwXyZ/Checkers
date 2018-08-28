@@ -32,6 +32,7 @@ namespace Checkers
         private bool _finishedGame;
         private bool _isBotSimulation;
         private bool _allowCheats = true;
+        private bool _autoRotate = false;
         public bool NeedBeat { get; set; }
         public bool CurrentWhiteTurn;
 
@@ -51,6 +52,8 @@ namespace Checkers
         public void Toggle_allowCheats() => _allowCheats = !_allowCheats;
 
         public bool Get_allowCheats() => _allowCheats;
+
+        public void Toggle_autoRotate() => _autoRotate = !_autoRotate;
 
         public bool Get_finishedGame() => _finishedGame;
 
@@ -216,6 +219,7 @@ namespace Checkers
 
         public void EndTurn()
         {
+            if (_finishedGame) return;
             var currentPlayerCanMove = false;
             foreach (var cell in Cells)
             {
@@ -254,13 +258,23 @@ namespace Checkers
                 isDraw = true;
 
 
+            if (!_isBotSimulation)
+            {
+                Console.WriteLine($@"[{(CurrentWhiteTurn ? "White" : "Black")}]Next turn!{Environment.NewLine}");
+                if (_autoRotate) Rotation += 2;
+                ((MainWindow) Application.Current.MainWindow)?.UpdateRotation();
+            }
+
             if (!isDraw && currentPlayerCanMove) return;
+            if (!_isBotSimulation)
+                ArtificialIntelligence.IncrementSeed();
+            UnselectLastCell();
             if (isDraw) //check draw type
                 drawType = ShowDrawType();
             ReRenderTable(BotStepTimeout);
             _finishedGame = true;
             if (!_isBotSimulation)
-                ((MainWindow) Application.Current.MainWindow)?.EngGame(isDraw ? drawType : (!CurrentWhiteTurn ? 1 : 0));
+                ((MainWindow) Application.Current.MainWindow)?.EngGame(isDraw && currentPlayerCanMove ? drawType : (!CurrentWhiteTurn ? 1 : 0));
         }
 
         public void BotTurn()
