@@ -38,7 +38,7 @@ namespace Checkers.AI
             if (selectedCell != null)
             {
                 var allowedPositions = selectedCell.GetAllowedPositions();
-                if(allowedPositions.Count == 0) return;
+                if (allowedPositions.Count == 0) return;
                 _desk.GetCell(allowedPositions[new Random().Next(allowedPositions.Count)]).Click(true);
                 if (_desk.Get_finishedGame()) return;
             }
@@ -60,6 +60,5 @@ namespace Checkers.AI
         }
 
         public void SetDesk(Desk desk) => _desk = desk;
-
     }
 }

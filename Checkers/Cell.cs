@@ -442,10 +442,10 @@ namespace Checkers
 
                     if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
                         break;
-                    if (viewedChecker != null && viewedChecker.Get_isShotDown()) break; //not shure
-
-                    if (viewedChecker != null && !viewedChecker.Get_isShotDown())
-                        ++enemyCheckersCount;
+                    if (viewedChecker == null) continue;
+                    if (viewedChecker.Get_isShotDown())
+                        break; //not shure
+                    ++enemyCheckersCount;
                 }
             }
 

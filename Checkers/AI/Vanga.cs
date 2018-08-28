@@ -130,7 +130,7 @@ namespace Checkers.AI
             nextCell.Click(false);
             if (desk.Get_finishedGame()) return score;
             var lastShotDownCell = desk.Get_lastShotDownCheckerCell();
-            if (lastShotDownCell == null)
+            if (lastShotDownCell == null) //debug
                 throw new Exception("Muuuuu!");
             score += GetCeckerScore(lastShotDownCell.Checker, side);
             Cell currentShotDownCell;
