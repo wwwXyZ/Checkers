@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,7 +25,6 @@ namespace Checkers
         public SolidColorBrush AllowedPositionColor;
         public Button Button;
         private readonly Desk _desk;
-        private string rawCell;
 
         public Cell(CellPosition position, CellColor color, Checker checker, Desk desk)
         {
@@ -73,15 +71,9 @@ namespace Checkers
             _desk = desk;
         }
 
-        public CellColor GetCellColor()
-        {
-            return _color;
-        }
+        public CellColor GetCellColor() => _color;
 
-        public CellPosition GetCellPosition()
-        {
-            return _position;
-        }
+        public CellPosition GetCellPosition() => _position;
 
         public StackPanel ConstructStackPanel(string imageSource)
         {
@@ -140,6 +132,8 @@ namespace Checkers
 
         public void Click(bool allowRender)
         {
+            if (_desk.Get_finishedGame())
+                return;
             if (Checker == null)
             {
 //                _desk.Set_ShotDownCeckerCell(null);
@@ -149,7 +143,7 @@ namespace Checkers
                     var cell = _desk.Get_selectedCell();
                     Checker = cell.Checker;
                     var position = cell.GetCellPosition();
-                    var startCell = _desk.Cells[position.Get_row() * _desk.Width + position.Get_column()];
+                    var startCell = _desk.GetCell(position);
                     startCell.Checker = null;
                     if (!Checker.Is_Quean() &&
                         (
@@ -174,14 +168,16 @@ namespace Checkers
                         if (selectedDiagonal != null)
                             foreach (var deskCell in selectedDiagonal.Cells)
                             {
-                                if (_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker == null) continue;
+                                var selectedChecker = _desk.GetCell(deskCell.GetCellPosition()).Checker;
+
+                                if (selectedChecker == null) continue;
                                 if (deskCell == this) break;
-                                if (_desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.Get_isWhite())
+                                if (selectedChecker.Get_isWhite())
                                     _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
                                 else
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
                                 if (deskCell.Checker == null) continue;
-                                _desk.Cells[deskCell.GetCellPosition().Get_row() * _desk.Width + deskCell.GetCellPosition().Get_column()].Checker.ShotDown();
+                                selectedChecker.ShotDown();
                                 _desk.Set_ShotDownCeckerCell(deskCell);
                                 break;
                             }
@@ -195,6 +191,8 @@ namespace Checkers
                         _desk.BattleCheckersPositions.Clear();
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
                         _desk.EndTurn(); //todo: need good working
+                        if (!_desk.Get_isBotSimulation() && _desk.Get_finishedGame())
+                            return;
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
                         if (allowRender)
@@ -306,9 +304,10 @@ namespace Checkers
             var allowLeft = true;
             var currentIndex = _position.Get_column() + _position.Get_row() * _desk.Width;
             Cell neighbordCell;
-            if (_position.Get_column() == 0)
+            var itsLastCheckerLine = _desk.CurrentWhiteTurn ? _position.Get_row() >= _desk.Width - 1 : _position.Get_row() <= 0;
+            if (_position.Get_column() == 0 || itsLastCheckerLine)
                 allowRight = false;
-            if (_position.Get_column() == _desk.Width - 1)
+            if (_position.Get_column() == _desk.Width - 1 || itsLastCheckerLine)
                 allowLeft = false;
             if (allowRight)
             {
@@ -443,6 +442,8 @@ namespace Checkers
 
                     if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
                         break;
+                    if (viewedChecker != null && viewedChecker.Get_isShotDown()) break; //not shure
+
                     if (viewedChecker != null && !viewedChecker.Get_isShotDown())
                         ++enemyCheckersCount;
                 }

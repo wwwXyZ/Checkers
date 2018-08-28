@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Checkers.AI;
@@ -13,7 +14,7 @@ namespace Checkers
 {
     public class Desk
     {
-        public const int BotStepTimeout = 700;
+        public const int BotStepTimeout = 0;
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -28,6 +29,7 @@ namespace Checkers
         private int _whiteCount;
         private int _blackQueansCount;
         private int _whiteQueansCount;
+        private bool _finishedGame;
         private bool _isBotSimulation;
         private bool _allowCheats = true;
         public bool NeedBeat { get; set; }
@@ -46,69 +48,33 @@ namespace Checkers
         private static ArtificialIntelligence _firstPlayerBot;
         private static ArtificialIntelligence _secondPlayerBot;
 
-        public void Toggle_allowCheats()
-        {
-            _allowCheats = !_allowCheats;
-        }
+        public void Toggle_allowCheats() => _allowCheats = !_allowCheats;
 
-        public bool Get_allowCheats()
-        {
-            return _allowCheats;
-        }
+        public bool Get_allowCheats() => _allowCheats;
 
-        public int Get_blackCount()
-        {
-            return _blackCount;
-        }
+        public bool Get_finishedGame() => _finishedGame;
 
-        public void Set_blackCount(int value)
-        {
-            _blackCount = value;
-        }
+        public int Get_blackCount() => _blackCount;
 
-        public int Get_whiteCount()
-        {
-            return _whiteCount;
-        }
+        public void Set_blackCount(int value) => _blackCount = value;
 
-        public void Set_whiteCount(int value)
-        {
-            _whiteCount = value;
-        }
+        public int Get_whiteCount() => _whiteCount;
 
-        public bool Get_isBotSimulation()
-        {
-            return _isBotSimulation;
-        }
-        public void StartBotSimulation()
-        {
-            _isBotSimulation = true;
-        }
+        public void Set_whiteCount(int value) => _whiteCount = value;
 
-        public Cell Get_selectedCell()
-        {
-            return _selectedCell;
-        }
+        public bool Get_isBotSimulation() => _isBotSimulation;
 
-        public Cell Get_lastShotDownCheckerCell()
-        {
-            return _lastShotDownCheckerCell;
-        }
+        public void StartBotSimulation() => _isBotSimulation = true;
 
-        public void Set_ShotDownCeckerCell(Cell checkerCell)
-        {
-            _lastShotDownCheckerCell = new Cell(checkerCell.GetCellPosition(), checkerCell.ReturnCellAsRawText(), this);
-        }
+        public Cell Get_selectedCell() => _selectedCell;
 
-    public static int GetMinHeight()
-        {
-            return MinHeight;
-        }
+        public Cell Get_lastShotDownCheckerCell() => _lastShotDownCheckerCell;
 
-        public static int GetMinWidth()
-        {
-            return MinWidth;
-        }
+        public void Set_ShotDownCeckerCell(Cell checkerCell) => _lastShotDownCheckerCell = new Cell(checkerCell.GetCellPosition(), checkerCell.ReturnCellAsRawText(), this);
+
+        public static int GetMinHeight() => MinHeight;
+
+        public static int GetMinWidth() => MinWidth;
 
         static Desk()
         {
@@ -208,6 +174,12 @@ namespace Checkers
         {
             Set_blackCount(0);
             Set_whiteCount(0);
+            _blackQueansCount = 0;
+            _whiteQueansCount = 0;
+            AllowedPositions.Clear();
+            _selectedCell = null;
+            _finishedGame = false;
+            _lastShotDownCheckerCell = null;
             Cells.Clear();
             GameCellsDeskHistory.Clear();
         }
@@ -217,6 +189,7 @@ namespace Checkers
             var cellColor = new Cell.CellColor(((column + row) % 2) == 0);
             var cellPosition = new Cell.CellPosition(column, row);
             var deskCell = new Cell(cellPosition, cellColor, null, this);
+            _selectedCell = null;
             if (withCheckers)
                 deskCell.SetDefaultChecker(this);
             return deskCell;
@@ -224,39 +197,6 @@ namespace Checkers
 
         public void Generate(bool withCeckers)
         {
-//           switch (Rotation)
-//            {
-//                case 1: // right
-//                    for (var column = 0; column < Width; column++)
-//                    {
-//                        for (var row = Height - 1; row >= 0; row--)
-//                        {
-//                            Add_cell(ConstructCell(row, column, withCeckers));
-//                        }
-//                    }
-//
-//                    break;
-//                case 2: // invert
-//                    for (var row = Height - 1; row >= 0; row--)
-//                    {
-//                        for (var column = Width - 1; column >= 0; column--)
-//                        {
-//                            Add_cell(ConstructCell(row, column, withCeckers));
-//                        }
-//                    }
-//
-//                    break;
-//                case 3: // left
-//                    for (var column = Width - 1; column >= 0; column--)
-//                    {
-//                        for (var row = 0; row < Height; row++)
-//                        {
-//                            Add_cell(ConstructCell(row, column, withCeckers));
-//                        }
-//                    }
-//
-//                    break;
-//                default: // 0 or default
             for (var row = 0; row < Height; row++)
             {
                 for (var column = 0; column < Width; column++)
@@ -264,16 +204,9 @@ namespace Checkers
                     Add_cell(ConstructCell(row, column, withCeckers));
                 }
             }
-
-//
-//                    break;
-//            }
         }
 
-        public void ShowAllowedPosition(Cell cell)
-        {
-            AllowedPositions.AddRange(cell.GetAllowedPositions());
-        }
+        public void ShowAllowedPosition(Cell cell) => AllowedPositions.AddRange(cell.GetAllowedPositions());
 
         public void UnselectLastCell()
         {
@@ -321,9 +254,12 @@ namespace Checkers
                 isDraw = true;
 
 
+            if (!isDraw && currentPlayerCanMove) return;
             if (isDraw) //check draw type
                 drawType = ShowDrawType();
-            if (isDraw || !currentPlayerCanMove)
+            ReRenderTable(BotStepTimeout);
+            _finishedGame = true;
+            if (!_isBotSimulation)
                 ((MainWindow) Application.Current.MainWindow)?.EngGame(isDraw ? drawType : (!CurrentWhiteTurn ? 1 : 0));
         }
 
@@ -331,7 +267,7 @@ namespace Checkers
         {
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
-                if (CurrentPlayerIsHuman() || _isBotSimulation) return;
+                if (CurrentPlayerIsHuman() || _isBotSimulation || _finishedGame || _whiteCount == 0 || _blackCount == 0) return;
                 var currentPlayerIsWhite = GetCurrentPlayer().Get_isWhite();
                 if (_firstPlayerBot != null && _firstPlayerBot.Get_isWhiteSide() == currentPlayerIsWhite)
                 {
@@ -345,7 +281,6 @@ namespace Checkers
                 }
             }));
         }
-
 
 
         /*
@@ -465,6 +400,7 @@ namespace Checkers
 
         public void ReRenderTable(int timeout)
         {
+            if (_isBotSimulation) return;
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
                 ((MainWindow) Application.Current.MainWindow)?.RenderBattlefield(false);
@@ -498,10 +434,7 @@ namespace Checkers
          * WiteOnTop(No 0; Yes 1;)
          * CurrentTurn(Black 0; White 1;)
          */
-        public void SaveInDeskHistory()
-        {
-            GameCellsDeskHistory.Add(ReturnDeskAsRawText());
-        }
+        public void SaveInDeskHistory() => GameCellsDeskHistory.Add(ReturnDeskAsRawText());
 
         public string ReturnDeskAsRawText()
         {
@@ -518,14 +451,10 @@ namespace Checkers
             return deskStatement;
         }
 
-        public Player GetCurrentPlayer()
-        {
-            return CurrentWhiteTurn ? (FirstPlayer.Get_isWhite() ? FirstPlayer : SecondPlayer) : (FirstPlayer.Get_isWhite() ? SecondPlayer : FirstPlayer);
-        }
+        public Player GetCurrentPlayer() => CurrentWhiteTurn ? (FirstPlayer.Get_isWhite() ? FirstPlayer : SecondPlayer) : (FirstPlayer.Get_isWhite() ? SecondPlayer : FirstPlayer);
 
-        public bool CurrentPlayerIsHuman()
-        {
-            return GetCurrentPlayer().Get_isHuman();
-        }
+        public bool CurrentPlayerIsHuman() => GetCurrentPlayer().Get_isHuman();
+
+        public Cell GetCell(Cell.CellPosition position) => Cells[position.Get_row() * Width + position.Get_column()];
     }
 }

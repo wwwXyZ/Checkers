@@ -6,14 +6,16 @@ namespace Checkers.AI
 {
     internal class Vanga
     {
-        private bool _isWhiteSide;
-        private Desk _desk;
+        private bool _vangaMadeTurn;
+        private readonly Desk _desk;
 
-        public Vanga(bool isWhiteSide, Desk desk)
+        public Vanga(Desk desk)
         {
-            _isWhiteSide = isWhiteSide;
             _desk = desk;
+            _vangaMadeTurn = false;
         }
+
+        public bool Get_vangaMadeTurn() => _vangaMadeTurn;
 
         public void GenerateMovePositions()
         {
@@ -22,7 +24,8 @@ namespace Checkers.AI
             if (_desk.NeedBeat)
             {
                 var cellPosition = SelectBestBeatCombination(_desk);
-                _desk.Cells[cellPosition.Get_row() * _desk.Width + cellPosition.Get_column()].Click(true);
+                _desk.GetCell(cellPosition).Click(true);
+                _vangaMadeTurn = true;
             }
             else
             {
@@ -66,7 +69,7 @@ namespace Checkers.AI
             var battleCeckersCells = new List<Cell>();
             foreach (var battleCheckerPosition in battleCheckersPositions)
             {
-                var cell = desk.Cells[battleCheckerPosition.Get_row() * desk.Width + battleCheckerPosition.Get_column()];
+                var cell = desk.GetCell(battleCheckerPosition);
                 battleCeckersCells.Add(cell);
             }
 
@@ -98,7 +101,7 @@ namespace Checkers.AI
             desk.StartBotSimulation();
             desk.CheckIfNeedBeate();
             if (!desk.NeedBeat) return score;
-            var checkerCell = desk.Cells[loadedCheckerCellPosition.Get_row() * desk.Width + loadedCheckerCellPosition.Get_column()];
+            var checkerCell = desk.GetCell(loadedCheckerCellPosition);
 
             var battleCells = checkerCell.GetBattleCells();
             Cell.CellPosition currentCellPosition = null;
@@ -117,19 +120,25 @@ namespace Checkers.AI
         {
             var score = currentScore;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());
+            if (desk.Get_finishedGame()) return score;
             desk.StartBotSimulation();
             var side = desk.CurrentWhiteTurn;
-            var checkerCell = desk.Cells[loadedCheckerCellPosition.Get_row() * desk.Width + loadedCheckerCellPosition.Get_column()];
-            var nextCell = desk.Cells[loadedNextCellPosition.Get_row() * desk.Width + loadedNextCellPosition.Get_column()];
+            var checkerCell = desk.GetCell(loadedCheckerCellPosition);
+            var nextCell = desk.GetCell(loadedNextCellPosition);
             checkerCell.Click(false);
+            if (desk.Get_finishedGame()) return score;
             nextCell.Click(false);
+            if (desk.Get_finishedGame()) return score;
             var lastShotDownCell = desk.Get_lastShotDownCheckerCell();
+            if (lastShotDownCell == null)
+                throw new Exception("Muuuuu!");
             score += GetCeckerScore(lastShotDownCell.Checker, side);
             Cell currentShotDownCell;
             while (side == desk.CurrentWhiteTurn)
             {
                 var cellPosition = SelectBestBeatCombination(desk);
-                desk.Cells[cellPosition.Get_row() * desk.Width + cellPosition.Get_column()].Click(false);
+                desk.GetCell(cellPosition).Click(false);
+                if (desk.Get_finishedGame()) return score;
                 currentShotDownCell = desk.Get_lastShotDownCheckerCell();
                 if (!lastShotDownCell.GetCellPosition().Equals(currentShotDownCell.GetCellPosition()))
                     score += GetCeckerScore(currentShotDownCell.Checker, side);
@@ -147,7 +156,8 @@ namespace Checkers.AI
             while (side != anotherSideDesk.CurrentWhiteTurn)
             {
                 var cellPosition = SelectBestBeatCombination(anotherSideDesk);
-                anotherSideDesk.Cells[cellPosition.Get_row() * anotherSideDesk.Width + cellPosition.Get_column()].Click(false);
+                anotherSideDesk.GetCell(cellPosition).Click(false);
+                if (desk.Get_finishedGame()) return score;
                 currentShotDownCell = anotherSideDesk.Get_lastShotDownCheckerCell();
                 if (currentShotDownCell != null && !lastShotDownCell.GetCellPosition().Equals(currentShotDownCell.GetCellPosition()))
                     score += GetCeckerScore(currentShotDownCell.Checker, side);

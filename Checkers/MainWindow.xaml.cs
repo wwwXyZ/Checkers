@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -26,7 +25,7 @@ namespace Checkers
         {
             InitializeComponent();
             // Generate checkers grid
-            Desk = new Desk(8, 8, 0, true, true, false);
+            Desk = new Desk(8, 8, 0, true, false, false);
             GenerateGrid();
         }
 
@@ -45,6 +44,8 @@ namespace Checkers
             Desk.Generate(true);
             RenderBattlefield(true);
             UpdateRotation();
+            if (!Desk.FirstPlayer.Get_isHuman() && Desk.CurrentWhiteTurn || !Desk.SecondPlayer.Get_isHuman() && !Desk.CurrentWhiteTurn)
+                Desk.BotTurn();
         }
 
         public void Render_checkers_position(bool viaClear)
@@ -127,7 +128,7 @@ namespace Checkers
                 throw new Exception("Incorrect control types");
             }
 
-            foreach (PropertyInfo sourceProperty in sourceControl.GetType().GetProperties())
+            foreach (var sourceProperty in sourceControl.GetType().GetProperties())
             {
                 var newValue = sourceProperty.GetValue(sourceControl, null);
 
