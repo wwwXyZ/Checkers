@@ -1,25 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Checkers.AI;
-using Checkers.Utils;
 
 namespace Checkers
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         public Desk Desk;
 
@@ -28,10 +14,13 @@ namespace Checkers
             InitializeComponent();
             // Generate checkers grid
             Desk = new Desk(8, 8, 0, false, false, false);
+            Desk.Changed += DeskOnChanged;
             GenerateGrid();
-#if DEBUG
-            ConsoleManager.Show();
-#endif
+        }
+
+        private void DeskOnChanged(object sender, DeskChangedEventArgs e)
+        {
+            RenderBattlefield(false);
         }
 
         private void BtnNewGameClick(object sender, RoutedEventArgs e)
@@ -49,7 +38,7 @@ namespace Checkers
             Desk.Generate(true);
             RenderBattlefield(true);
             UpdateRotation();
-            if (!Desk.FirstPlayer.Get_isHuman() && Desk.CurrentWhiteTurn || !Desk.SecondPlayer.Get_isHuman() && !Desk.CurrentWhiteTurn)
+            if (!Desk.FirstPlayer.IsHuman && Desk.CurrentWhiteTurn || !Desk.SecondPlayer.IsHuman && !Desk.CurrentWhiteTurn)
                 Desk.BotTurn();
         }
 
@@ -76,7 +65,7 @@ namespace Checkers
             Ungrd.RenderTransform = rotateTransform;
         }
 
-        public void RenderBattlefield(bool viaClear)
+        private void RenderBattlefield(bool viaClear)
         {
             Render_checkers_position(viaClear);
             var whiteCount = Desk.Get_whiteCount();

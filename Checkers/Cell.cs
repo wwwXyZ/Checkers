@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace Checkers
 {
-    public partial class Cell
+    public class Cell
     {
         private readonly CellColor _color;
         private readonly CellPosition _position;
@@ -100,7 +95,7 @@ namespace Checkers
                 if (Checker == null)
                     Button.Background = ActiveButtonColor;
                 else
-                    Button.Background = !Checker.Is_Quean() ? ActiveCheckerColor : ActiveKingCheckerColor;
+                    Button.Background = !Checker.IsQuean ? ActiveCheckerColor : ActiveKingCheckerColor;
             else
                 Button.Background = _desk.AllowedPositions.Contains(GetCellPosition()) ? AllowedPositionColor : _color.Get_color();
 
@@ -115,7 +110,7 @@ namespace Checkers
                 //            Button.Content = "***" + Environment.NewLine + "***";
 
                 Button.Content = ConstructStackPanel(Checker.Get_image());
-                if (Checker.Get_isShotDown())
+                if (Checker.IsShotDown)
                     Button.Background = Brushes.Green;
             }
 
@@ -132,11 +127,12 @@ namespace Checkers
 
         public void Click(bool allowRender)
         {
-            if (_desk.Get_finishedGame())
+            if (_desk.IsGameFinished)
                 return;
+
             if (Checker == null)
             {
-//                _desk.Set_ShotDownCeckerCell(null);
+                // _desk.Set_ShotDownCeckerCell(null);
                 if (_desk.AllowedPositions.Contains(_position))
                 {
                     // move to new position
@@ -145,34 +141,30 @@ namespace Checkers
                     var position = cell.GetCellPosition();
                     var startCell = _desk.GetCell(position);
                     startCell.Checker = null;
-                    if (!Checker.Is_Quean() &&
+                    if (!Checker.IsQuean &&
                         (
-                            _desk.CurrentWhiteTurn && Checker.Get_isWhite() &&
+                            _desk.CurrentWhiteTurn && Checker.IsWhite &&
                             _position.Get_row() == _desk.Height - 1 ||
-                            !_desk.CurrentWhiteTurn && !Checker.Get_isWhite() &&
+                            !_desk.CurrentWhiteTurn && !Checker.IsWhite &&
                             _position.Get_row() == 0
                         ))
                         Checker.SetAsQuean();
+
                     if (_desk.NeedBeat)
                     {
                         //remove Checkers between startCell and cell
                         var diagonals = startCell.GetCellDiagonals();
-                        Diagonal selectedDiagonal = null;
-                        foreach (var diagonal in diagonals)
-                        {
-                            if (!diagonal.Cells.Contains(this)) continue;
-                            selectedDiagonal = diagonal;
-                            break;
-                        }
+                        var selectedDiagonal = diagonals.FirstOrDefault(diagonal => diagonal.Cells.Contains(this));
 
                         if (selectedDiagonal != null)
+                        {
                             foreach (var deskCell in selectedDiagonal.Cells)
                             {
                                 var selectedChecker = _desk.GetCell(deskCell.GetCellPosition()).Checker;
 
                                 if (selectedChecker == null) continue;
                                 if (deskCell == this) break;
-                                if (selectedChecker.Get_isWhite())
+                                if (selectedChecker.IsWhite)
                                     _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
                                 else
                                     _desk.Set_blackCount(_desk.Get_blackCount() - 1);
@@ -181,6 +173,7 @@ namespace Checkers
                                 _desk.Set_ShotDownCeckerCell(deskCell);
                                 break;
                             }
+                        }
 
                         Click(false);
                         _desk.CheckIfNeedBeate(this);
@@ -191,19 +184,31 @@ namespace Checkers
                         _desk.BattleCheckersPositions.Clear();
                         _desk.CurrentWhiteTurn = !_desk.CurrentWhiteTurn;
                         _desk.EndTurn(); //todo: need good working
-                        if (!_desk.Get_isBotSimulation() && _desk.Get_finishedGame())
+
+                        if (!_desk.Get_isBotSimulation() && _desk.IsGameFinished)
+                        {
                             return;
+                        }
+
                         _desk.UnselectLastCell();
                         _desk.CheckIfNeedBeate();
                         if (allowRender)
-                            _desk.ReRenderTable(Desk.BotStepTimeout);
+                        {
+                            _desk.NotifyOfDeskChanged();
+                        }
+
                         _desk.BotTurn();
+
                         if (allowRender)
-                            _desk.ReRenderTable(Desk.BotStepTimeout);
+                        {
+                            _desk.NotifyOfDeskChanged();
+                        }
                     }
 
                     if (allowRender)
-                        _desk.ReRenderTable();
+                    {
+                        _desk.NotifyOfDeskChanged();
+                    }
 
                     return;
                 }
@@ -220,7 +225,7 @@ namespace Checkers
                         Checker.SetAsQuean();
                     if (Keyboard.IsKeyDown(Key.D))
                     {
-                        if (!Checker.Get_isShotDown() && Checker.Get_isWhite())
+                        if (!Checker.IsShotDown && Checker.IsWhite)
                             _desk.Set_whiteCount(_desk.Get_whiteCount() - 1);
                         else
                             _desk.Set_blackCount(_desk.Get_blackCount() - 1);
@@ -241,21 +246,27 @@ namespace Checkers
                         }
 
                         if (allowRender)
-                            _desk.ReRenderTable();
+                        {
+                            _desk.NotifyOfDeskChanged();
+                        }
+
                         return;
                     }
                 }
 
-                if (_desk.CurrentWhiteTurn && Checker.Get_isWhite() ||
-                    !_desk.CurrentWhiteTurn && !Checker.Get_isWhite())
+                if (_desk.CurrentWhiteTurn && Checker.IsWhite || !_desk.CurrentWhiteTurn && !Checker.IsWhite)
                 {
                     _desk.UnselectLastCell();
                     _desk.SetSelectedCell(this);
                     _desk.CheckIfNeedBeate();
+
                     if (_desk.NeedBeat)
                     {
                         var allowedPositionsCells = GetBattleCells();
-                        foreach (var cell in allowedPositionsCells) _desk.AllowedPositions.Add(cell._position);
+                        foreach (var cell in allowedPositionsCells)
+                        {
+                            _desk.AllowedPositions.Add(cell._position);
+                        }
                     }
                     else
                     {
@@ -264,12 +275,14 @@ namespace Checkers
 
                     _desk.BotTurn();
                     if (allowRender)
-                        _desk.ReRenderTable(Desk.BotStepTimeout);
+                        _desk.NotifyOfDeskChanged();
                 }
             }
 
             if (allowRender)
-                _desk.ReRenderTable();
+            {
+                _desk.NotifyOfDeskChanged();
+            }
         }
 
         public void SetDefaultChecker(Desk desk)
@@ -327,7 +340,7 @@ namespace Checkers
             return neighbors;
         }
 
-        public List<Diagonal> GetCellDiagonals()
+        private IEnumerable<Diagonal> GetCellDiagonals()
         {
             var diagonals = new List<Diagonal>();
             var diagonal = new Diagonal(0);
@@ -343,7 +356,7 @@ namespace Checkers
                 if (isCurrentCell)
                     isCurrentCell = false;
                 else
-                    diagonal.AddCell(currentCell);
+                    diagonal.Cells.Add(currentCell);
                 if (existNextCell)
                     currentCell = _desk.Cells[nextPosition];
             }
@@ -363,7 +376,7 @@ namespace Checkers
                 if (isCurrentCell)
                     isCurrentCell = false;
                 else
-                    diagonal.AddCell(currentCell);
+                    diagonal.Cells.Add(currentCell);
                 if (existNextCell)
                     currentCell = _desk.Cells[nextPosition];
             }
@@ -383,7 +396,7 @@ namespace Checkers
                 if (isCurrentCell)
                     isCurrentCell = false;
                 else
-                    diagonal.AddCell(currentCell);
+                    diagonal.Cells.Add(currentCell);
                 if (existNextCell)
                     currentCell = _desk.Cells[nextPosition];
             }
@@ -403,7 +416,7 @@ namespace Checkers
                 if (isCurrentCell)
                     isCurrentCell = false;
                 else
-                    diagonal.AddCell(currentCell);
+                    diagonal.Cells.Add(currentCell);
                 if (existNextCell)
                     currentCell = _desk.Cells[nextPosition];
             }
@@ -418,7 +431,11 @@ namespace Checkers
         {
             var battleCells = new List<Cell>();
             var currentChecker = Checker;
-            if (currentChecker == null || currentChecker.Get_isShotDown() || currentChecker.Get_isWhite() != _desk.CurrentWhiteTurn) return battleCells;
+            if (currentChecker == null || currentChecker.IsShotDown || currentChecker.IsWhite != _desk.CurrentWhiteTurn)
+            {
+                return battleCells;
+            }
+
             var diagonals = GetCellDiagonals();
             foreach (var diagonal in diagonals)
             {
@@ -431,19 +448,31 @@ namespace Checkers
                         if (enemyCheckersCount == 1)
                         {
                             if (!battleCells.Contains(deskCell))
+                            {
                                 battleCells.Add(deskCell);
+                            }
+
                             if (!_desk.BattleCheckersPositions.Contains(_position))
+                            {
                                 _desk.BattleCheckersPositions.Add(_position);
+                            }
                         }
 
-                        if (!currentChecker.Is_Quean())
+                        if (!currentChecker.IsQuean)
                             break;
                     }
 
-                    if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.Get_isWhite() == currentChecker.Get_isWhite())
+                    if (enemyCheckersCount > 1 || viewedChecker != null && viewedChecker.IsWhite == currentChecker.IsWhite)
+                    {
                         break;
-                    if (viewedChecker == null) continue;
-                    if (viewedChecker.Get_isShotDown())
+                    }
+
+                    if (viewedChecker == null)
+                    {
+                        continue;
+                    }
+
+                    if (viewedChecker.IsShotDown)
                         break; //not shure
                     ++enemyCheckersCount;
                 }
@@ -456,7 +485,7 @@ namespace Checkers
         {
             var positions = new List<CellPosition>();
             var checker = Checker;
-            if (!checker.Is_Quean())
+            if (!checker.IsQuean)
             {
                 var neighbors = GetCheckerNeighborsList(true);
                 foreach (var neighbordCell in neighbors)
@@ -484,7 +513,7 @@ namespace Checkers
         public string ReturnCellAsRawText()
         {
             var number = _color.Get_isWhite() ? "1" : "0";
-            number += Checker == null ? "0" : (Checker.Get_isWhite() ? (Checker.Is_Quean() ? "4" : "3") : (Checker.Is_Quean() ? "2" : "1"));
+            number += Checker == null ? "0" : (Checker.IsWhite ? (Checker.IsQuean ? "4" : "3") : (Checker.IsQuean ? "2" : "1"));
             return number;
         }
     }
