@@ -122,9 +122,9 @@
     <Compile Include="Cell.cs" />
     <Compile Include="Checker.cs" />
     <Compile Include="CellColor.cs" />
+    <Compile Include="DeskChangedEventArgs.cs" />
     <Compile Include="Diagonal.cs" />
     <Compile Include="CellPosition.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

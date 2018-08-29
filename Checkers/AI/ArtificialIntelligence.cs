@@ -52,13 +52,13 @@ namespace Checkers.AI
                 var nextPosition = allowedPositions[randNumber];
                 Console.WriteLine($@"nextPosition = r:{nextPosition.Get_row()} c:{nextPosition.Get_column()}");
                 _desk.GetCell(nextPosition).Click(true);
-                if (_desk.Get_finishedGame()) return;
+                if (_desk.IsGameFinished) return;
             }
 
             var checkersCells = new List<Cell>();
             foreach (var cell in _desk.Cells)
             {
-                if (cell.Checker == null || cell.Checker.Get_isWhite() != _isWhiteSide) continue;
+                if (cell.Checker == null || cell.Checker.IsWhite != _isWhiteSide) continue;
                 var allowedPositions = cell.GetAllowedPositions();
                 if (allowedPositions.Count <= 0) continue;
                 checkersCells.Add(cell);

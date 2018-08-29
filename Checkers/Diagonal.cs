@@ -4,22 +4,13 @@ namespace Checkers
 {
     public class Diagonal
     {
-        public List<Cell> Cells = new List<Cell>();
-        private readonly int _direction; // 0 - left top; 1 - right top; 2 - left botom; 3 - right botom
+        public List<Cell> Cells { get; } = new List<Cell>();
+
+        public int Direction { get; }
 
         public Diagonal(int direction)
         {
-            _direction = direction;
-        }
-
-        public void AddCell(Cell cell)
-        {
-            Cells.Add(cell);
-        }
-
-        public int GetDirection()
-        {
-            return _direction;
+            Direction = direction;
         }
     }
 }

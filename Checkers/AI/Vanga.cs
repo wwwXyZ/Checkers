@@ -130,15 +130,15 @@ namespace Checkers.AI
         {
             var score = currentScore;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());
-            if (desk.Get_finishedGame()) return score;
+            if (desk.IsGameFinished) return score;
             desk.StartBotSimulation();
             var side = desk.CurrentWhiteTurn;
             var checkerCell = desk.GetCell(loadedCheckerCellPosition);
             var nextCell = desk.GetCell(loadedNextCellPosition);
             checkerCell.Click(false);
-            if (desk.Get_finishedGame()) return score;
+            if (desk.IsGameFinished) return score;
             nextCell.Click(false);
-            if (desk.Get_finishedGame()) return score;
+            if (desk.IsGameFinished) return score;
             var lastShotDownCell = desk.Get_lastShotDownCheckerCell();
             if (lastShotDownCell == null) //debug
                 throw new Exception("Muuuuu!");
@@ -148,7 +148,7 @@ namespace Checkers.AI
             {
                 var cellPosition = SelectBestBeatCombination(desk);
                 desk.GetCell(cellPosition).Click(false);
-                if (desk.Get_finishedGame()) return score;
+                if (desk.IsGameFinished) return score;
                 currentShotDownCell = desk.Get_lastShotDownCheckerCell();
                 if (!lastShotDownCell.GetCellPosition().Equals(currentShotDownCell.GetCellPosition()))
                     score += GetCeckerScore(currentShotDownCell.Checker, side);
@@ -168,7 +168,7 @@ namespace Checkers.AI
             {
                 var cellPosition = SelectBestBeatCombination(anotherSideDesk);
                 anotherSideDesk.GetCell(cellPosition).Click(false);
-                if (desk.Get_finishedGame()) return score;
+                if (desk.IsGameFinished) return score;
                 currentShotDownCell = anotherSideDesk.Get_lastShotDownCheckerCell();
                 if (currentShotDownCell != null && !lastShotDownCell.GetCellPosition().Equals(currentShotDownCell.GetCellPosition()))
                     score += GetCeckerScore(currentShotDownCell.Checker, side);
@@ -188,7 +188,7 @@ namespace Checkers.AI
          */
         private int GetCeckerScore(Checker checker, bool isWhiteSide)
         {
-            var score = checker == null ? 0 : (checker.Get_isWhite() != isWhiteSide ? (checker.Is_Quean() ? 14 : 4) : (checker.Is_Quean() ? -15 : -6));
+            var score = checker == null ? 0 : (checker.IsWhite != isWhiteSide ? (checker.IsQuean ? 14 : 4) : (checker.IsQuean ? -15 : -6));
             return score;
         }
     }
