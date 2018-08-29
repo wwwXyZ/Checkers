@@ -15,7 +15,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Checkers.AI;
-using Checkers.Utils;
 
 namespace Checkers
 {
@@ -29,9 +28,6 @@ namespace Checkers
             // Generate checkers grid
             Desk = new Desk(8, 8, 0, false, false, false);
             GenerateGrid();
-#if DEBUG
-            ConsoleManager.Show();
-#endif
         }
 
         private void BtnNewGameClick(object sender, RoutedEventArgs e)
