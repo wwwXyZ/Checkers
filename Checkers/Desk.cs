@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Markup;
-using System.Windows.Media;
 using System.Windows.Threading;
 using Checkers.AI;
-using FontFamily = Svg.Text.FontFamily;
 
 namespace Checkers
 {
