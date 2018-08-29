@@ -113,7 +113,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="AI\ArtificialIntelligence.cs" />
-    <Compile Include="AI\MonteCarloMl.cs" />
     <Compile Include="AI\Vanga.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
