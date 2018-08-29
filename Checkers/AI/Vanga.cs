@@ -23,7 +23,7 @@ namespace Checkers.AI
             _desk.CheckIfNeedBeate();
             if (_desk.NeedBeat)
             {
-                Cell.CellPosition cellPosition = null;
+                CellPosition cellPosition = null;
 //                var thread = new Thread(() =>
 //                {
                 cellPosition = SelectBestBeatCombination(_desk);
@@ -43,10 +43,10 @@ namespace Checkers.AI
             }
         }
 
-        private Cell.CellPosition SelectBestBeatCombination(Desk desk)
+        private CellPosition SelectBestBeatCombination(Desk desk)
         {
             var selectedCell = desk.Get_selectedCell();
-            Cell.CellPosition currentCellPosition;
+            CellPosition currentCellPosition;
             int currentScore;
             if (selectedCell != null)
             {
@@ -104,7 +104,7 @@ namespace Checkers.AI
             return currentCellPosition;
         }
 
-        private int GetScore(Desk loadedDesk, Cell.CellPosition loadedCheckerCellPosition)
+        private int GetScore(Desk loadedDesk, CellPosition loadedCheckerCellPosition)
         {
             var score = 0;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());
@@ -114,7 +114,7 @@ namespace Checkers.AI
             var checkerCell = desk.GetCell(loadedCheckerCellPosition);
 
             var battleCells = checkerCell.GetBattleCells();
-            Cell.CellPosition currentCellPosition = null;
+            CellPosition currentCellPosition = null;
             foreach (var battleCell in battleCells)
             {
                 var selectedScore = GetScore(desk, checkerCell.GetCellPosition(), battleCell.GetCellPosition(), score);
@@ -126,7 +126,7 @@ namespace Checkers.AI
             return score;
         }
 
-        private int GetScore(Desk loadedDesk, Cell.CellPosition loadedCheckerCellPosition, Cell.CellPosition loadedNextCellPosition, int currentScore)
+        private int GetScore(Desk loadedDesk, CellPosition loadedCheckerCellPosition, CellPosition loadedNextCellPosition, int currentScore)
         {
             var score = currentScore;
             var desk = new Desk(loadedDesk.ReturnDeskAsRawText());

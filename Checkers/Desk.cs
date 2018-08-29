@@ -37,10 +37,10 @@ namespace Checkers
         private Cell _selectedCell;
         private Cell _lastShotDownCheckerCell;
         public List<Cell> Cells = new List<Cell>();
-        public List<Cell.CellPosition> TopDefaultPositions = new List<Cell.CellPosition>();
-        public List<Cell.CellPosition> BottomDefaultPositions = new List<Cell.CellPosition>();
-        public List<Cell.CellPosition> AllowedPositions = new List<Cell.CellPosition>();
-        public List<Cell.CellPosition> BattleCheckersPositions = new List<Cell.CellPosition>();
+        public List<CellPosition> TopDefaultPositions = new List<CellPosition>();
+        public List<CellPosition> BottomDefaultPositions = new List<CellPosition>();
+        public List<CellPosition> AllowedPositions = new List<CellPosition>();
+        public List<CellPosition> BattleCheckersPositions = new List<CellPosition>();
         public List<string> GameCellsDeskHistory = new List<string>();
         private static ArtificialIntelligence _firstPlayerBot;
         private static ArtificialIntelligence _secondPlayerBot;
@@ -133,7 +133,7 @@ namespace Checkers
                 for (var column = 0; column < Width; column++)
                 {
                     var rawCell = rawCells[row * Width + column];
-                    Cells.Add(new Cell(new Cell.CellPosition(column, row), rawCell, this));
+                    Cells.Add(new Cell(new CellPosition(column, row), rawCell, this));
                 }
             }
 
@@ -152,9 +152,9 @@ namespace Checkers
                 {
                     if ((column + row) % 2 == 0) continue;
                     if (row < (Height - minusRows) / 2 - 1)
-                        TopDefaultPositions.Add(new Cell.CellPosition(column, row));
+                        TopDefaultPositions.Add(new CellPosition(column, row));
                     else if (row >= (Height + minusRows) / 2 + 1)
-                        BottomDefaultPositions.Add(new Cell.CellPosition(column, row));
+                        BottomDefaultPositions.Add(new CellPosition(column, row));
                 }
             }
         }
@@ -185,8 +185,8 @@ namespace Checkers
 
         private Cell ConstructCell(int row, int column, bool withCheckers)
         {
-            var cellColor = new Cell.CellColor(((column + row) % 2) == 0);
-            var cellPosition = new Cell.CellPosition(column, row);
+            var cellColor = new CellColor(((column + row) % 2) == 0);
+            var cellPosition = new CellPosition(column, row);
             var deskCell = new Cell(cellPosition, cellColor, null, this);
             _selectedCell = null;
             if (withCheckers)
@@ -465,6 +465,6 @@ namespace Checkers
 
         public bool CurrentPlayerIsHuman() => GetCurrentPlayer().Get_isHuman();
 
-        public Cell GetCell(Cell.CellPosition position) => Cells[position.Get_row() * Width + position.Get_column()];
+        public Cell GetCell(CellPosition position) => Cells[position.Get_row() * Width + position.Get_column()];
     }
 }

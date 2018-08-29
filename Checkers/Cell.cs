@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 
 namespace Checkers
 {
-    public partial class Cell
+    public class Cell
     {
         private readonly CellColor _color;
         private readonly CellPosition _position;
